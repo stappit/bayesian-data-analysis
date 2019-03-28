@@ -1,0 +1,128 @@
+---
+title: "Exercise 1"
+author: "Brian Callander"
+date: "28 March 2019"
+output: html_document
+---
+
+<div style="display:none">
+  $\DeclareMathOperator{\binomial}{Binomial}
+   \DeclareMathOperator{\bernoulli}{Bernoulli}
+   \DeclareMathOperator{\poisson}{Poisson}
+   \DeclareMathOperator{\normal}{Normal}
+   \DeclareMathOperator{\studentt}{t}
+   \DeclareMathOperator{\cauchy}{Cauchy}
+   \DeclareMathOperator{\exponential}{Exp}
+   \DeclareMathOperator{\uniform}{Uniform}
+   \DeclareMathOperator{\gamma}{Gamma}
+   \DeclareMathOperator{\invgamma}{InvGamma}
+   \DeclareMathOperator{\invlogit}{InvLogit}
+   \DeclareMathOperator{\logit}{Logit}
+   \DeclareMathOperator{\dirichlet}{Dirichlet}
+   \DeclareMathOperator{\beta}{Beta}$
+</div>
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  # cache = TRUE,
+  # dev = "svglite",
+  echo = TRUE,
+  comment = NA,
+  message = FALSE,
+  warning = TRUE,
+  error = TRUE
+)
+
+library(tidyverse)
+library(scales)
+library(kableExtra)
+library(here)
+
+theme_set(theme_bw())
+```
+
+## Part A
+
+The marginal density of $y$ (a.k.a. the prior predictive distribution) is
+
+$$
+\begin{align}
+  p(y)
+  &=
+  p(y \mid \theta = 1) \cdot p(\theta = 1)
+  +
+  p(y \mid \theta = 2) \cdot p(\theta = 2)
+  \\
+  &=
+  \normal(y \mid 1, 2) \cdot 0.5
+  +
+  \normal(y \mid 2, 2) \cdot 0.5
+\end{align}
+$$
+
+The graph of the prior predictive distribution is
+
+```{r}
+tibble(y = seq(-5, 8, 0.05)) %>% 
+  mutate(
+    density = 0.5 * (dnorm(y, 1, 2) + dnorm(y, 2, 2))
+  ) %>% 
+  ggplot() + 
+  aes(y, density) +
+  geom_line()
+```
+
+
+This looks fairly normal because the variance is so large (in relation to the distance between the two means). However, the weighted average of normal probability density functions is not necessarily the probability density function of the weighted average of normal random variables. This becomes clearer if we plot the same prior predictive distribution but with a very small variance.
+
+
+```{r}
+tibble(y = seq(0, 3, 0.01)) %>% 
+  mutate(
+    density = 0.5 * (dnorm(y, 1, 0.1) + dnorm(y, 2, 0.1))
+  ) %>% 
+  ggplot() + 
+  aes(y, density) +
+  geom_line()
+```
+
+## Part B
+
+$$
+\begin{align}
+  \mathbb P(\theta \mid y = 1)
+  &=
+  \frac{
+    \mathbb P(y = 1 \mid \theta) \cdot \mathbb P (\theta)
+  }{
+    \mathbb P(y)
+  }
+  \\
+  &=
+  \frac{
+    \normal(1 \mid \theta, 2) \cdot 0.5
+  }{
+    \normal(1 \mid 1, 2) \cdot 0.5
+    +
+    \normal(1 \mid 2, 2) \cdot 0.5
+  }
+  \\
+  &=
+  \frac{
+    \normal(1 \mid \theta, 2) 
+  }{
+    \normal(1 \mid 1, 2) 
+    +
+    \normal(1 \mid 2, 2) 
+  }
+\end{align}
+$$
+
+which is approximately 0.531 when evaluated at $\theta = 1$.
+
+## Part C
+
+As $\sigma \rightarrow 0$, the posterior density of $\theta$ converges around a point mass at $y = 1$. This is because $\normal(1 \mid 2, \sigma) \approx 0$ for $\sigma \gg 0$.
+
+As $\sigma \rightarrow \infty$, the posterior density of $\theta$ converges to 0.5. This is because $\normal(1 \mid 1, \sigma) \approx \normal(1 \mid 2, \sigma)$ for $\sigma \gg 0$.
+
