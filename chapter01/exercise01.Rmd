@@ -73,7 +73,7 @@ tibble(y = seq(-5, 8, 0.05)) %>%
 ```
 
 
-This looks fairly normal because the variance is so large (in relation to the distance between the two means). However, the weighted average of normal probability density functions is not necessarily the probability density function of the weighted average of normal random variables. This becomes clearer if we plot the same prior predictive distribution but with a very small variance.
+This looks fairly normal because the variance is so large (in relation to the distance between the two means). However, the weighted average of normal probability density functions is not necessarily the probability density function of the weighted average of normal random variables. In other words, summing two normal probability density functions doesn't give us a normal density function, even though the sum of two normal random variables is a normal random variable. This becomes clearer if we plot the same prior predictive distribution but with a very small variance.
 
 
 ```{r}
@@ -85,6 +85,8 @@ tibble(y = seq(0, 3, 0.01)) %>%
   aes(y, density) +
   geom_line()
 ```
+
+Clearly, this distribution is not normal. In particular, it is multi-modal.
 
 ## Part B
 
@@ -122,7 +124,7 @@ which is approximately 0.531 when evaluated at $\theta = 1$.
 
 ## Part C
 
-As $\sigma \rightarrow 0$, the posterior density of $\theta$ converges around a point mass at $y = 1$. This is because $\normal(1 \mid 2, \sigma) \approx 0$ for $\sigma \gg 0$.
+As $\sigma \rightarrow 0$, the posterior density of $\theta$ converges around a point mass at $y = 1$. This is because $\normal(1 \mid 2, \sigma) \approx 0$ for $\sigma$ sufficiently small.
 
 As $\sigma \rightarrow \infty$, the posterior density of $\theta$ converges to 0.5. This is because $\normal(1 \mid 1, \sigma) \approx \normal(1 \mid 2, \sigma)$ for $\sigma \gg 0$.
 
