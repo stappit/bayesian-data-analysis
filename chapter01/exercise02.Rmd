@@ -1,0 +1,52 @@
+---
+title: "Exercise 2"
+author: "Sören Berg"
+date: "11 April 2019"
+output: html_document
+---
+
+# Exercise 2 
+
+## Part I - equation (1.8) for vectors 
+
+We show that $E(u) = E(E(u|v))$. 
+
+First, note that if $x\in\R^d$ is a vector the vector valued integral with $x$ as an integrant is defined by $\int x := (\int x_1, \dots, \int x_d)^t$. Therefore, it is sufficient to show 
+
+$$ 
+E(u_i) = \int \int u_i p(u, v) \ du \ dv = \int \int u_i p(u|v) \ du \ p(v) \ dv = \int E(u_i|v) p(v) \ dv = E(E(u_i|v)) 
+$$ 
+
+for all $i=1,\dots, d$. This implies that $E(u) = E(E(u|v))$. 
+  
+
+## Part II - equation (1.9) for vectors 
+
+We show $Cov(u) = E(Cov(u|v)) + Cov(E(u|v))$. 
+
+For the covariance matrix of a random variable $X=(x_1,\dots, x_d)^t \in\R^d$ with $\mu = E(X)\in\R^d$ it holds 
+
+$$ 
+\begin{aligned} 
+Cov(X) &= E( (X-\mu)(X-\mu)^t ) \\ 
+&= E\left( \begin{pmatrix} (x_1- \mu_1)^2 & \dots & (x_1-\mu_1)(x_d-\mu_d) \\ \vdots & & \vdots \\ (x_d-\mu_d)(x_1-\mu_1) & \dots & (x_d- \mu_d)^2 \end{pmatrix} \right) \\ 
+&= \begin{pmatrix} Var(x_1) & \dots & Cov(x_1, x_d) \\ \vdots & & \vdots \\ Cov(x_d, x_1) & \dots & Var(x_d, x_d) \end{pmatrix}. 
+\end{aligned} 
+$$ 
+
+Using the identity above and basic rules for the expectation value we conclude 
+
+$$ 
+\begin{aligned} 
+\left(E(Cov(u|v)) + Cov(E(u|v))\right)_{ij} &= E(Cov(u|v)_{ij}) + Cov(E(u|v))_{ij} \\ 
+&= E( Cov(u_i, u_j|v)) + Cov(E(u_i|v), E(u_j|v)) \\ 
+&= E( E(u_iu_j|v) - E(u_i|v)E(u_j|v) ) + E( E(u_i|v)E(u_j|v)) - E( E(u_i|v)) E(E(u_j|v)) \\ 
+&=E( E(u_iu_j|v)) - E( E(u_i|v)) E(E(u_j|v)) \\ 
+&= E(u_iu_j) - E(u_i)E(u_j) \\ 
+&= Cov(u_i, u_j), 
+\end{aligned} 
+$$ 
+
+for all $i,j \in \{1,\dots,d\}$. 
+
+Therefore, $Cov(u) = E(Cov(u|v)) + Cov(E(u|v))$.
