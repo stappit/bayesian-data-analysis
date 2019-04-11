@@ -1,0 +1,114 @@
+---
+title: "Exercise 3"
+author: "Corrie"
+date: "April 10, 2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Probability calculation for genetics
+Suppose that in each individual of a large population there is a pair of genes, each of which can be either $x$ or $X$, that controls eye color: those with xx have blue eyes, while heterozygotes ($xX$ or $Xx$) and those with XX have brown eyes. The proportion of blue-eyed individuals is $p^2$ and the proportion of heterozygotes is $2p(1-p)$. The proportion of brown-eyed homozygotes is then $(1-p)^2$.Each parent transmits one of its own genes to the child where the probability to transmit either gene is $\frac{1}{2}$.
+
+## Part 1
+Assuming random mating, show that among brown-eyed children of brown-eyed parents, the expcted proportion of heterozygotes is $2p/(1+2p)$.
+
+We write short-hand $Xx$ to mean both heterozygote combinations. We also denote $B$ as brown-eyed.
+
+We first consider the different combinations of brown-eyed parents we can have. There are three combinations for a person to be brown-eyed thus we have $3 \times 3 = 9$ different gene combinations for brown-eyed parents.
+Of these 9 combinations, there is
+
+  - 1 combination with parents homozygote (both are $XX$). 
+  The probability of this to happen is $(1-p)^4$.
+  - 4 combinations with one parent heterozygote and one homozygote (e.g. $Xx$ and $XX$). 
+  The probability of this combination is $4p(1-p)^3$.
+  - 4 combinations with both parents heterozygote (e.g. $Xx$).
+  The probability $4p^2(1-p)^2$.
+  
+For each parent combination, there are 4 combinations how to transmit the genes to its children, each of which is equally likely.
+
+- If both parents are brown-eyed homozygotes, then all 4 possible combinations to transmit are also homozygote and $0$ of $4$ are heterozygote.
+- If one parent is heterozygote, the other homozygote, we can get the following combinations: $Xx$, $xX$, $XX$, $XX$.
+  That is $2$ of $4$ are heterozygotes.
+- If both parents are heterozygotes, we can get the following combinations: $Xx$, $xX$, $XX$ and $xx$. 
+  Since we already know that both parents and kids are all brown-eyed, we can omit $xx$ as a possible combination. Thus $2$ of $3$ combinations are heterozygote.
+  
+We can now combine all this information to obtain the desired probability as follows:
+
+
+$$\begin{align*}
+Pr(\text{Judy} = Xx | \text{ Judy & parents}= B) &=  \frac{0 \times (1-p)^4 + 2 \times 4p(1-p)^3 + 2\times 4p^2(1-p)^2}{4 \times (1-p)^4 + 4 \times 4p(1-p)^3 + 3\times 4p^2(1-p)^2} \\
+\\
+&= \frac{ (1-p)^2 \left[ 8p(1-p) +8p^2 \right] }{4(1-p)^2 \left[ (1-p)^2 +  4p(1-p) + 3\times p^2 \right]} \\
+\\
+&= \frac{ 8p(1-p)^2 \left[ 1-p +p \right] }{4(1-p)^2 \left[ 1-2p + p^2 +  4p-4p^2 + 3 p^2 \right]} \\
+\\
+&= \frac{ 2p }{ 1+2p  }
+\end{align*}$$
+
+## Part 2
+Suppose Judy, a brown-eyed child of brown-eyed parents, marries a heterozygote, and they have $n$ children, all brown-eyed. Find the posterior probability that Judy is a heterozygote.
+
+$$\begin{align*}
+Pr(\text{Judy}= Xx | n \text{ children} = B ) &= \frac{ Pr(\text{Judy}= Xx) Pr( n \text{ children} = B | \text{Judy}= Xx) }{Pr( n \text{ children} = B )} 
+\end{align*}$$
+
+We calculated above the prior probability that Judy is heterozygote as
+$$Pr(\text{Judy}= Xx) = \frac{2p}{1+2p}$$
+
+To compute the probability of $n$ children, given that Judy is heterozygote, remember from above that when both parents are heterozygote, we have 3 of 4 combinations that result in brown-eyed children. Thus:
+$$Pr( n \text{ children} = B |\text{Judy}= Xx ) = \left( \frac{3}{4} \right)^n $$
+
+Last, we need the probability of the denominator:
+$$Pr(n \text{ children} = B ) = Pr(\text{Judy}= Xx) Pr( n \text{ children} = B |\text{Judy}= Xx ) + Pr( \text{Judy}=XX) Pr(  n \text{ children} = B |\text{Judy}= XX )$$
+
+Obviously, $Pr(  n \text{ children} = B |\text{Judy}= XX ) = 1$. Also, 
+$$\begin{align*}
+Pr( \text{Judy}=XX) &= 1 - Pr( \text{Judy}=Xx) \\
+&= 1 - \frac{2p}{1+2p} \\
+&= \frac{1 +2p - 2p}{1+2p} \\
+&= \frac{1}{1+2p}
+\end{align*}$$
+
+Plugging all this together, we get:
+$$
+\begin{align*}
+Pr(\text{Judy}= Xx | n \text{ children} = B ) &= \frac{ \left( \frac{3}{4} \right)^n  \frac{2p}{1+2p} }{ \left( \frac{3}{4} \right)^n  \frac{2p}{1+2p} + \frac{1}{1+2p}}
+\end{align*}$$
+
+## Part 3
+Find the probability (given all information as above) that Judys first grand-children has blue eyes.
+
+The grand-child can only have blue eyes if Judys child is heterozygote and if her random mate is also heterozygote or blue-eyed. For two heterozygote parents, we know the probability of having a blue-eyed kid is $1$ of $4$. If one parent is blue-eyed and the other heterozygote then 2 of 4 combination result in a blue-eyed kid. So we get:
+
+$$\begin{align*}
+Pr(\text{ Judys grand-kid} = xx) &=  Pr(\text{Judys kid} = Xx) \left[ \frac{1}{4} Pr(\text{random mate} = Xx) + \frac{1}{2} Pr(\text{radom mate} = xx) \right] \\
+&= Pr(\text{Judys kid} = Xx) \left[  \frac{1}{4} 2p(1-p) + \frac{1}{2} p^2 \right] \\
+&= Pr(\text{Judys kid} = Xx) \left(  \frac{1}{2} p \right)
+\end{align*}$$
+
+To get the probability that Judys kid heterozygote, we need to consider the two cases of Judy being heterozygote or homozygote.
+We already know the posterior probability that Judy is heterozygote and the probability of a heterozygote kid when both parents are heterozygote. If Judy is homozygote then the probability of a heterozygote kid is $\frac{1}{2}$.
+To get the probability that Judy is homozygote, we only need to change the nominator in the posterior probability:
+$$
+\begin{align*}
+Pr(\text{Judy}= XX | n \text{ children} = B ) &= \frac{ \frac{1}{1+2p} }{ \left( \frac{3}{4} \right)^n  \frac{2p}{1+2p} + \frac{1}{1+2p}}
+\end{align*}$$
+
+Thus:
+$$
+\begin{align*}
+Pr(\text{Judys kid} = Xx  ) &= \frac{1}{2}Pr(\text{Judy}= XX ) + \frac{2}{3} Pr(\text{Judy}= Xx) \\
+\\
+&= \frac{1}{2} \frac{ \frac{1}{1+2p} }{ \left( \frac{3}{4} \right)^n  \frac{2p}{1+2p} + \frac{1}{1+2p}} + \frac{2}{3} \frac{ \left( \frac{3}{4} \right)^n  \frac{2p}{1+2p} }{ \left( \frac{3}{4} \right)^n  \frac{2p}{1+2p} + \frac{1}{1+2p}} \\
+\end{align*}$$
+
+
+And therefore we get the following probability for a blue-eyed grand-kid:
+$$\begin{align*}
+Pr(\text{ Judys grand-kid} = xx) &= Pr(\text{Judys kid} = Xx) \left(  \frac{1}{2} p \right) \\
+\\
+&= \left[ \frac{1}{2} \frac{ \frac{1}{1+2p} }{ \left( \frac{3}{4} \right)^n  \frac{2p}{1+2p} + \frac{1}{1+2p}} + \frac{2}{3} \frac{ \left( \frac{3}{4} \right)^n  \frac{2p}{1+2p} }{ \left( \frac{3}{4} \right)^n  \frac{2p}{1+2p} + \frac{1}{1+2p}} \right] \left(  \frac{1}{2} p \right) 
+\end{align*}$$
