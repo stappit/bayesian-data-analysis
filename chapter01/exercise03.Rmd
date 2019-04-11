@@ -80,3 +80,35 @@ Pr(\text{Judy}= Xx | n \text{ children} = B ) &= \frac{ \left( \frac{3}{4} \righ
 
 ## Part 3
 Find the probability (given all information as above) that Judys first grand-children has blue eyes.
+
+The grand-child can only have blue eyes if Judys child is heterozygote and if her random mate is also heterozygote or blue-eyed. For two heterozygote parents, we know the probability of having a blue-eyed kid is $1$ of $4$. If one parent is blue-eyed and the other heterozygote then 2 of 4 combination result in a blue-eyed kid. So we get:
+
+$$\begin{align*}
+Pr(\text{ Judys grand-kid} = xx) &=  Pr(\text{Judys kid} = Xx) \left[ \frac{1}{4} Pr(\text{random mate} = Xx) + \frac{1}{2} Pr(\text{radom mate} = xx) \right] \\
+&= Pr(\text{Judys kid} = Xx) \left[  \frac{1}{4} 2p(1-p) + \frac{1}{2} p^2 \right] \\
+&= Pr(\text{Judys kid} = Xx) \left(  \frac{1}{2} p \right)
+\end{align*}$$
+
+To get the probability that Judys kid heterozygote, we need to consider the two cases of Judy being heterozygote or homozygote.
+We already know the posterior probability that Judy is heterozygote and the probability of a heterozygote kid when both parents are heterozygote. If Judy is homozygote then the probability of a heterozygote kid is $\frac{1}{2}$.
+To get the probability that Judy is homozygote, we only need to change the nominator in the posterior probability:
+$$
+\begin{align*}
+Pr(\text{Judy}= XX | n \text{ children} = B ) &= \frac{ \frac{1}{1+2p} }{ \left( \frac{3}{4} \right)^n  \frac{2p}{1+2p} + \frac{1}{1+2p}}
+\end{align*}$$
+
+Thus:
+$$
+\begin{align*}
+Pr(\text{Judys kid} = Xx  ) &= \frac{1}{2}Pr(\text{Judy}= XX ) + \frac{2}{3} Pr(\text{Judy}= Xx) \\
+\\
+&= \frac{1}{2} \frac{ \frac{1}{1+2p} }{ \left( \frac{3}{4} \right)^n  \frac{2p}{1+2p} + \frac{1}{1+2p}} + \frac{2}{3} \frac{ \left( \frac{3}{4} \right)^n  \frac{2p}{1+2p} }{ \left( \frac{3}{4} \right)^n  \frac{2p}{1+2p} + \frac{1}{1+2p}} \\
+\end{align*}$$
+
+
+And therefore we get the following probability for a blue-eyed grand-kid:
+$$\begin{align*}
+Pr(\text{ Judys grand-kid} = xx) &= Pr(\text{Judys kid} = Xx) \left(  \frac{1}{2} p \right) \\
+\\
+&= \left[ \frac{1}{2} \frac{ \frac{1}{1+2p} }{ \left( \frac{3}{4} \right)^n  \frac{2p}{1+2p} + \frac{1}{1+2p}} + \frac{2}{3} \frac{ \left( \frac{3}{4} \right)^n  \frac{2p}{1+2p} }{ \left( \frac{3}{4} \right)^n  \frac{2p}{1+2p} + \frac{1}{1+2p}} \right] \left(  \frac{1}{2} p \right) 
+\end{align*}$$
