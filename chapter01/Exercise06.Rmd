@@ -1,0 +1,46 @@
+---
+title: "BDA3 - exercise 1.6"
+author: "Tiago"
+date: "`r Sys.Date()`"
+output: tint::tintHtml
+---
+Our goal is to compute the probability that Elvis was an indentical twin, given he had a twin brother. 
+
+We know some things in advance:
+
+- Probability of identical twins being born :$p(\text{indentical twins}) = \frac{1}{300}$;
+
+- Probability of Fraternal twins: $p(\text{Fraternal twins}) = \frac{1}{125}$
+
+- Probability of the baby being male: $p(\text{baby boy}) = \frac{1}{2}$
+
+Our goal is to compute the conditional probability
+
+$$
+P(\text{Elvis being an identical twin} \ | \ \text{Elvis had a twin brother} )
+$$
+
+Since they were both boys, we know that:
+
+1. $P(\text{both boys | identical twins }) = \frac{1}{2}$, given that the outcome can only be {Male,Male} or {Female, Female};
+
+2. $P(\text{both boys | fraternal twins }) = \frac{1}{4}$, since the outcome can be {Male,Male} or {Female, Female}, {Female,Male} and {Male,Female}.
+
+We can then compute the unconditional probabilities:
+
+1. $P(\text{Identical twins & both boys}) = p(\text{both boys | identical twins}) \times p(\text{indentical twins)} =  \frac{1}{2} \times \frac{1}{300}$
+
+2. $P(\text{Fraternal twins & both boys}) = p(\text{both boys | Fraternal twins}) \times p(\text{Fraternal twins)} =  \frac{1}{2} \times \frac{1}{125}$
+
+Now, we can use the unconditional probabilities to compute our target conditional probability:
+
+\begin{align} 
+P(\text{Elvis being an identical twin} \ | \ \text{Elvis had a twin brother}) = \frac{P(\text{Identical twins & both boys})}{P(\text{being twins})} \\
+= \frac{P(\text{Identical twins & both boys})}{P(\text{Identical twins & both boys}) + P(\text{Fraternal twins & both boys})} \\
+= \frac{\frac{1}{2} \times \frac{1}{300}}
+{\frac{1}{2} \times \frac{1}{300} + \frac{1}{4} \times \frac{1}{125}} \\
+& = \frac{5}{11}
+\end{align}
+
+
+I was lazy and used wolfram alpha to compute the score but corresponds to the solutions released by the authors. 
