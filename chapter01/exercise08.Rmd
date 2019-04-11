@@ -1,0 +1,55 @@
+---
+title: "Chapter 01 -- Exercise08"
+author: "Jan Kraemer"
+date: "11 April 2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## The Question
+
+Subjective probability: discuss the following statement. "The Probability of event $E$ is considered 'Subjective' if two rational persons $A$ and $B$ can assign unequal probabilities to $E$, $P_A(E)$ and $P_B(E)$. These probabilities can also be interpreted as 'contidional': $P_A(E) = P(E|I_A)$ and $P_B(E) = P(E|I_B)$, where $I_A$ and $I_B$ represent the knowledge available to persons $A$ and $B$ respectively."
+
+Apply this idea to the following examples:
+
+a) the probability that a '6' appears when a fair die is rolled, where A observes the outcome of the die roll and B does not.
+b) The probability that Brazil wins the next World Cup, where A is ignorant of soccer and B is a knowledgeable sports fan.
+
+## An Attempt towards the Answer
+
+### Thoughts regarding subjective probability
+
+The hard part is how to formulate the individual knowledge mathematically. 
+
+
+### Part a)
+
+#### The Intuitive Approach
+
+I would posit that for $E=6$: $P(E|I_A)=1$, her knowing the outcome, while $P_B(E) = 1/6$, being clueless and just _hoping_ it is a fair dice.
+
+#### Mathematical formulism
+
+\[
+P(E)=\frac{1}{6} \\
+I_A: E\in \{6\}; I_B: E \in \{1\dots6\} \\
+\\
+P_A(E=6)=P(E=6|I_A)=P(E=6|E\in\{6\})=\frac{P(E=6 \cap E\in\{6\})}{P(E=6)}=\frac{P(E=6)}{P(E=6)}=1\\
+P_B(E=6)=P(E=6|I_B)=P(E=6|E \in \{1\dots6\})=\frac{P(E=6 \cap E \in \{1\dots6\})}{P(E \in \{1\dots6\})} = \frac{P(E=6)}{P(E \in \{1\dots6\})} = \frac{1/6}{1}=\frac{1}{6}
+\]
+
+
+### Part b)
+
+#### The Intuitive Approach
+
+This is a hard one since I am rather well modeled by person $A$. So I went to Wikipedia, saw that Brasil won 5 titles so far, and posit: $P(\text{'Barzil wins next Worldcup'}|\text{'wikipedia'})=P(\text{'Brazil won any one World cup in the past'})=\frac{5}{21}$
+
+As for $B$: I have no idea how to begin to model that....even intuitively...
+
+#### Mathematical formulism
+
+I don't even...
