@@ -49,7 +49,34 @@ Pr(\text{Judy} = Xx | \text{ Judy & parents}= B) &=  \frac{0 \times (1-p)^4 + 2 
 \end{align*}$$
 
 ## Part 2
-Suppose Judy, a brown-eyed child of brown-eyed parents, marries a heterozygote, and they have $n$ children, all brown-eyed. Find the posterior probability that Judy is a heterozygote
+Suppose Judy, a brown-eyed child of brown-eyed parents, marries a heterozygote, and they have $n$ children, all brown-eyed. Find the posterior probability that Judy is a heterozygote.
+
+$$\begin{align*}
+Pr(\text{Judy}= Xx | n \text{ children} = B ) &= \frac{ Pr(\text{Judy}= Xx) Pr( n \text{ children} = B | \text{Judy}= Xx) }{Pr( n \text{ children} = B )} 
+\end{align*}$$
+
+We calculated above the prior probability that Judy is heterozygote as
+$$Pr(\text{Judy}= Xx) = \frac{2p}{1+2p}$$
+
+To compute the probability of $n$ children, given that Judy is heterozygote, remember from above that when both parents are heterozygote, we have 3 of 4 combinations that result in brown-eyed children. Thus:
+$$Pr( n \text{ children} = B |\text{Judy}= Xx ) = \left( \frac{3}{4} \right)^n $$
+
+Last, we need the probability of the denominator:
+$$Pr(n \text{ children} = B ) = Pr(\text{Judy}= Xx) Pr( n \text{ children} = B |\text{Judy}= Xx ) + Pr( \text{Judy}=XX) Pr(  n \text{ children} = B |\text{Judy}= XX )$$
+
+Obviously, $Pr(  n \text{ children} = B |\text{Judy}= XX ) = 1$. Also, 
+$$\begin{align*}
+Pr( \text{Judy}=XX) &= 1 - Pr( \text{Judy}=Xx) \\
+&= 1 - \frac{2p}{1+2p} \\
+&= \frac{1 +2p - 2p}{1+2p} \\
+&= \frac{1}{1+2p}
+\end{align*}$$
+
+Plugging all this together, we get:
+$$
+\begin{align*}
+Pr(\text{Judy}= Xx | n \text{ children} = B ) &= \frac{ \left( \frac{3}{4} \right)^n  \frac{2p}{1+2p} }{ \left( \frac{3}{4} \right)^n  \frac{2p}{1+2p} + \frac{1}{1+2p}}
+\end{align*}$$
 
 ## Part 3
 Find the probability (given all information as above) that Judys first grand-children has blue eyes.
