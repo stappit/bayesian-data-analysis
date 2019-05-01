@@ -1,8 +1,12 @@
 ---
 title: "Exercise 3"
-author: "Corrie"
+author: "Corrie Bartelheimer"
 date: "April 10, 2019"
-output: html_document
+output:
+  prettydoc::html_pretty:
+    theme: leonids
+    highlight: github
+    toc: true
 ---
 
 ```{r setup, include=FALSE}
