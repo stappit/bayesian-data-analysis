@@ -2,9 +2,7 @@
 title: "Exercise 10"
 author: "Corrie Bartelheimer"
 output:
-  prettydoc::html_pretty:
-    theme: leonids
-    highlight: github
+  html_document:
     toc: true
 ---
 ```{r setup, include=FALSE}
