@@ -1,0 +1,64 @@
+---
+title: "r markdown"
+author: "Salma Bouzid"
+date: "4/11/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Prior to solving this problem, section 1.6 of the book should be read. 
+
+##4.a.Let's compute based on observed frequency:  
+#### Pr(favorite wins | point spread = 8)
+```{r cars}
+number_fav_win = 8
+total_num_games_played = 12
+
+prob_fav_win_spr8 = number_fav_win/total_num_games_played
+prob_fav_win_spr8
+```
+
+#### Pr(favorite wins by at least 8 | point spread = 8)
+```{r cars}
+number_fav_win_atleast_8 = 5
+total_num_games_played = 12
+
+prob_fav_win_atleast_8 = number_fav_win_atleast_8/total_num_games_played
+prob_fav_win_atleast_8
+```
+
+#### Pr(favorite wins by at least 8 | point spread = 8 and favorite wins).
+
+```{r cars}
+number_fav_win_atleast_8 = 5
+number_fav_win = 8
+
+prob_fav_win_atleast_8_favorite_wins = number_fav_win_atleast_8/number_fav_win
+prob_fav_win_atleast_8_favorite_wins
+```
+
+##4.(b) Let's build a paramteric model for the difference beween outcome and spread. 
+In here we will assume that the distribution of the difference (outcome-spread) follows a normal distribution with mean 0 and standard deviation equal to 14. 
+
+### Pr(favorite wins | point spread = 8)
+### If our favorite team is to win, then he needs to have a point spread difference of more than 8, thus the 8.5
+
+```{r cars}
+
+prob_fav_win_spr8 <- pnorm(8.5,0,13.86)
+prob_fav_win_spr8
+```
+#### Pr(favorite wins by at least 8 | point spread = 8)
+```{r}
+prob_fav_win_atleast_8 = pnorm(.5,0,14)
+prob_fav_win_atleast_8
+```
+
+#### Pr(favorite wins by at least 8 | point spread = 8 and favorite wins) = P(favorite wins by at least 8 | point spread = 8) / P(favorite wins by at least 8 | favorite wins)
+```{r}
+prob_fav_win_atleast_8/prob_fav_win_spr8
+```
+
