@@ -1,0 +1,161 @@
+---
+title: "Exercise 10"
+author: "Corrie Bartelheimer"
+output:
+  prettydoc::html_pretty:
+    theme: leonids
+    highlight: github
+    toc: true
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, comment=NA)
+```
+## Problem
+Suppose there are $N$ cable cars in San Francisco, numbered sequentially from 1 to $N$. You see a cable car at random; it is numbered 203. You wish to estimate $N$.
+
+
+## Some preliminary thoughts
+Before starting to solve the exercise, let's think what we would intuitively expect without using any statistical knowledge.
+Obviously, having seen a cable car numbered 203, we know that $N$ cannot be lower than 203. So $N$ must be 203 or higher. My first guess when seeing the number 203 would be to expect $N$ to be around 400. My intuitive reasoning for this is as follows: If $N$ would be much much larger than 203 then the probability for seeing a cable car with a number higher than 203 also becomes larger. On the other hand, if $N$ would be close to 203, the probability for seeing a car numbered smaller than 203 becomes larger. I expect to half the time see a car with a number smaller than $\lfloor \frac{N}{2}\rfloor$ and the other half a car with a number larger than $\frac{N}{2}$, hence the guess of 400 after seeing the car 203.
+Let's see if this intuition agrees with the math.
+
+## Part (a) - Compute the posterior
+Assume your prior distribution on $N$ is geometric with mean 100; that is
+$$p(N) = \frac{1}{100} \left(\frac{99}{100}\right)^{N-1}$$
+for $N =1, 2,...$.
+What is your posterior distribution for $N$?
+
+For this problem, we can approximate the posterior using grid approximation. 
+```{r}
+N_seq <- 1:1000000
+
+prior_mean <- 100
+prior <- 1/prior_mean * (1-1/prior_mean)^(N_seq - 1)
+```
+We use the following function for the likelihood:
+$$P(y \,|\, N) = \begin{cases}
+        \frac{1}{N}  &\text{ if }N \geq y\\
+        0 & \text{otherwise} \end{cases}$$
+where $y$ denotes our observed data, here $y=203$.
+
+We then compute the likelihood for all possible $N$ (as big as computationally still possible), multiply the prior with the likelihood and simply standardize the posterior by dividing out its sum:
+```{r}
+lkhd <- ifelse( N_seq >= 203, 1/N_seq, 0)
+
+unstzd.post <- prior * lkhd
+
+post <- unstzd.post / sum(unstzd.post)
+
+
+plot(N_seq, post, type = "l", xlim = c(1, 1000),
+     main="Posterior", xlab="N", ylab = "")
+```
+
+The posterior is highly skewed with very small probability mass on very large values of $N$. By definition of our likelihood, there's no probability mass on values of $N$ below 203. Interestingly, and different from my intuition, most probability mass is on the values just above 203.
+
+## Part (b) - Computing posterior summaries
+What are the posterior mean and standard deviation of $N$?
+
+To compute the posterior mean and standard deviation, we sample from our posterior distribution:
+```{r}
+post_sample <- sample(N_seq, size=2000, replace=T, prob=post)
+hist(post_sample, breaks = 30, main="Histogram of the posterior sample",
+     xlab="N")
+```
+
+Computing posterior summaries is then straight-forward:
+```{r}
+mean(post_sample)
+```
+
+```{r}
+median(post_sample)
+```
+
+
+```{r}
+sd(post_sample)
+```
+
+```{r}
+Mode <- function(x) {
+  ux <- unique(x)
+  ux[which.max(tabulate(match(x, ux)))]
+}
+Mode(post_sample)
+```
+
+Our posterior distribution tells us to expect $N$ to be around 280, much smaller than my guess of around 400. One reason for this value is also our prior: Since we only have one observation, our prior has a strong influence. Picking different prior means for the geometric prior distribution yields different posterior means.
+
+## Part (c) - Non-informative prior
+Choose a reasonable 'non-informative' prior distribution for $N$ and give the resulting posterior distribution, mean and standard deviation for $N$.
+
+A first idea would be to take a flat uniform prior: $P(N) \propto 1$. However, this leads to an improper posterior:
+
+$$\begin{align*}
+P(N \,|\,) &\propto P(N) P(y \,|\, N) &\\
+&\propto P(y \,|\, N) &\\
+&\propto \frac{1}{N} & \text{if } N \geq y 
+\end{align*}$$
+Since $\sum_{N=1}^{\infty} \frac{1}{N} = \infty$, this posterior would be improper. Simulating this shows the problems we get:
+```{r}
+N_seq <- 1:100000
+prior <- 1
+
+lkhd <- ifelse( N_seq >= 203, 1/N_seq, 0)
+
+unstzd.post <- prior * lkhd
+
+post <- unstzd.post / sum(unstzd.post)
+post_sample <- sample(N_seq, size=2000, replace=T, prob=post)
+
+plot(N_seq, post, type = "l", xlim = c(1, 1000),
+     main="Posterior", xlab="N", ylab = "")
+```
+
+There's too much probability mass on high values and if we try to compute the mean we get unreasonably high values and wildly different values if we change the support over which we approximate the posterior.
+
+Another option for the prior is $P(N) \propto \frac{1}{N}$. This is an improper prior (same reasoning as above, it doesn't integrate to 1) but it leads to a proper posterior density:
+$$\begin{align*}
+P(N \,|\,y) &\propto P(N) P(y \,|\, N) &\\
+&\propto \frac{1}{N} \cdot \frac{1}{N} & \text{if } N \geq y\\
+&\propto \frac{1}{N^2} & \text{if } N \geq y \\
+&= 
+c\frac{1}{N^2} & \text{if } N \geq y, \text{ for some } c\\
+\end{align*}$$
+since the sum $\sum_{N=1}^{\infty} \frac{1}{N^2}$ converges.
+
+We can compute $c$ as follows:
+$$\begin{align*}
+1  &= c\sum_{N=203}^\infty \frac{1}{N^2} \\
+\iff \quad \frac{1}{c}&=  \sum_{N=203}^\infty \frac{1}{N^2}\\ 
+& = \sum_{N=1}^\infty \frac{1}{N^2} - \sum_{N=1}^{202} \frac{1}{N^2} \\
+& = \frac{\pi^2}{6} - \sum_{N=1}^{202} \frac{1}{N^2}
+\end{align*}$$
+
+We compute $c$ numerically:
+```{r}
+one_c <- pi^2/6 - sum( 1/(1:202)^2)
+c <- 1/one_c
+c
+```
+
+```{r}
+N_seq <- 1:1000000
+
+post <- ifelse( N_seq >= 203, c/N_seq^2, 0)
+
+post_sample <- sample(N_seq, size=2000, replace=T, prob=post)
+
+plot(N_seq, post, type = "l", xlim = c(1, 1000),
+     main="Posterior", xlab="N", ylab = "")
+```
+
+It is straight-forward to see that this posterior does not have a mean:
+$$\begin{align*}
+E(N\,|\,y) &= \sum_{N=1}^\infty N \cdot P(N\,|\,y) \\
+&= \sum_{N=203}^\infty N \frac{c}{N^2} \\
+&= \sum_{N=203}^\infty \frac{c}{N} \\
+&= \infty
+\end{align*}$$
+
