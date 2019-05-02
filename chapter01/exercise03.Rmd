@@ -1,8 +1,10 @@
 ---
 title: "Exercise 3"
-author: "Corrie"
+author: "Corrie Bartelheimer"
 date: "April 10, 2019"
-output: html_document
+output:
+  html_document:
+    toc: true
 ---
 
 ```{r setup, include=FALSE}
