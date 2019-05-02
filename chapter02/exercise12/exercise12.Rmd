@@ -2,9 +2,7 @@
 title: "Chapter 2 - Exercise 12"
 author: "Aaron McDaid - aaron.mcdaid@gmail.com"
 date: "2 May 2019"
-output:
-    html_document:
-        keep_md: true
+output: html_document
 ---
 
 <div style="display:none">
