@@ -204,6 +204,12 @@ $(document).ready(function () {
 <p><span class="math display">\[ 
 \begin{aligned}
 p(y | \theta) &amp;= \binom{n}{y} \theta^y (1-\theta)^{n-y} 
+= \binom{n}{y} (1-\theta)^n e^{\log(\theta^y (1-\theta)^{-y})} \\
+&amp;= \binom{n}{y} (1-\theta)^n  e^{\left(\log\frac{\theta}{1-\theta}\right)y}.
+\end{aligned}
+\]</span> <span class="math display">\[ 
+\begin{aligned}
+p(y | \theta) &amp;= \binom{n}{y} \theta^y (1-\theta)^{n-y} 
 = \binom{n}{y} e^{\log(\theta^y (1-\theta)^{n-y})} \\
 &amp;= \binom{n}{y} e^{y \log\theta + (n-y)\log(1-\theta)} 
 = \binom{n}{y} e^{n\log(1-\theta) + (\log\theta - \log(1-\theta))y} \\

@@ -14,10 +14,8 @@ We start by determining the natural parameter
 $$ 
 \begin{aligned}
 p(y | \theta) &= \binom{n}{y} \theta^y (1-\theta)^{n-y} 
-= \binom{n}{y} e^{\log(\theta^y (1-\theta)^{n-y})} \\
-&= \binom{n}{y} e^{y \log\theta + (n-y)\log(1-\theta)} 
-= \binom{n}{y} e^{n\log(1-\theta) + (\log\theta - \log(1-\theta))y} \\
-&= \binom{n}{y} (1-\theta)^n  e^{\left(\log\frac{\theta}{1-\theta}\right)y}.
+= \binom{n}{y} (1-\theta)^n e^{\log(\theta^y (1-\theta)^{-y})}
+= \binom{n}{y} (1-\theta)^n  e^{\left(\log\frac{\theta}{1-\theta}\right)y}.
 \end{aligned}
 $$
 
