@@ -1,0 +1,61 @@
+---
+title: "Exercise 7"
+author: "Sören Berg"
+date: "01 May 2019"
+output: html_document
+---
+
+## (a)
+
+We show that for the binomial likelihood $y \sim \mathrm{Bin}(n, \theta)$ $p(\theta)\propto \theta^{-1}(1-\theta)^{-1}$ is the uniform prior distribution for the natural parameters of the exponential family.
+
+We start by determining the natural parameter 
+
+$$ 
+\begin{aligned}
+p(y | \theta) &= \binom{n}{y} \theta^y (1-\theta)^{n-y} 
+= \binom{n}{y} (1-\theta)^n e^{\log(\theta^y (1-\theta)^{-y})}
+= \binom{n}{y} (1-\theta)^n  e^{\left(\log\frac{\theta}{1-\theta}\right)y}.
+\end{aligned}
+$$
+
+This also verifies that the binomial distribution belongs to the exponential
+family with $f(y)=\binom{n}{y}$, $g(\theta)= (1-\theta)^n$, $\phi(\theta)=\mathrm{logit}(\theta)=\log\frac{\theta}{1-\theta}$ and $u(y)=y$, cf. notation on page 36 BDA3.
+
+Now, let $p$ be a density with $p(\phi(\theta))\propto 1$. Since $\phi$ is a one-to-one transformation we can transform the density as follows. Note that said transformation can be done by equation (2.19) on page 52 BDA3, which is a special case of more general transformation theorems for integrals. First, note that the inverse of the logit function is the sigmoid function $\phi^{-1}(\theta) = \frac{1}{1+e^{-\theta}}$.
+We conclude
+
+$$
+\begin{aligned}
+p(\theta)
+&= p(\phi^{-1}(\phi(\theta)))
+= p(\phi(\theta)) \left| \frac{d\phi(\theta)}{d\theta}\right|
+= p(\phi(\theta)) \left| \frac{1}{\tfrac{\theta}{1-\theta}} \frac{1}{(1-\theta)^2}\right|\\
+&= p(\phi(\theta)) \left| \frac{1}{\theta(1-\theta)}\right|
+= p(\phi(\theta)) \frac{1}{\theta(1-\theta)}
+\propto \frac{1}{\theta(1-\theta)}=\theta^{-1}(1-\theta)^{-1}.
+\end{aligned}
+$$
+
+
+## (b)
+We show that if $y=0$ or $y=n$ the resulting posterior is improper.
+
+The resulting posterior is proportional to the prior times the likelihood. Thus,
+
+$$
+p(\theta|y) \propto p(\theta) p(y|\theta) 
+= \theta^{-1}(1-\theta)^{-1} \binom{n}{y}\theta^y(1-\theta)^{n-y}
+\propto \theta^{y-1}(1-\theta)^{n-y-1}.
+$$
+
+Let $y=0$, then the integral over the posterior is (except some nonzero normalization factor) 
+
+$$
+\int_0^1  \theta^{y-1}(1-\theta)^{n-y-1} \ \mathrm{d}\theta
+= \int_0^1  \theta^{-1}(1-\theta)^{n-1} \ \mathrm{d}\theta
+\geq \int_0^1 \theta^{-1} \ \mathrm{d}\theta
+= \lim_{\theta\searrow 0} \log(\theta) = \infty,
+$$
+where the inequality follows since $\theta\in[0,1]$.
+The case $y=n$ can be tackled analogously.

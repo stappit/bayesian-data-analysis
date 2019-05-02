@@ -1,0 +1,26 @@
+---
+title: "Exercise 3"
+author: "Sören Berg"
+date: "01 May 2019"
+output: html_document
+---
+
+## (a)
+
+The number of 6's in 1000 rolls of a fair die is $\mathrm{Bin}\left(1000, \frac{1}{6}\right)$ distributed with mean $\frac{1000}{6}$ and standard deviation $\sqrt{1000 \frac{1}{6}\frac{5}{6}}$. We approximate this distribution with a normal distribution with same mean and standard deviation.
+
+```{r}
+x <- seq(100,220,1)
+y <- dnorm(x, 1000/6, sqrt(1000*1/6*5/6)) 
+plot(x, y, type="l")
+```
+
+## (b)
+
+```{r}
+qnorm(0.05, 1000/6, sqrt(1000*1/6*5/6)) 
+qnorm(0.25, 1000/6, sqrt(1000*1/6*5/6)) 
+qnorm(0.5, 1000/6, sqrt(1000*1/6*5/6)) 
+qnorm(0.75, 1000/6, sqrt(1000*1/6*5/6)) 
+qnorm(0.95, 1000/6, sqrt(1000*1/6*5/6)) 
+```
