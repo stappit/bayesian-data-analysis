@@ -83,3 +83,19 @@ Then, because $y$ has a Poisson distribution, the mean and variance of $y$ are s
 Final step in the Jeffreys formula above is to apply the square root, giving us the Jeffreys' prior for Poisson:
 
 $$ p(\theta) \propto \sqrt{I(\theta)} = \sqrt{\frac1{\theta}} = \theta^{-\frac12} $$
+
+
+To complete the exercise, we are also asked to find a parameterization of the Gamma distribution which is a close match to this:
+
+$$ \theta \sim Gamma(\alpha, \beta) $$
+
+$$ f(\theta | \alpha, \beta) = \frac{\beta^\alpha}{\Gamma(\alpha)} \theta^{\alpha-1} e^{-\beta\theta} $$
+
+This can be achieved by setting $\alpha=\frac12$ and $\beta=0$
+
+\begin{align}
+f(\theta | \alpha, \beta) & = \frac{0^\frac12}{\Gamma\left(\frac12\right)} \theta^{\frac12-1} e^{-0\theta}
+\\                          = \frac{0^\frac12}{\Gamma\left(\frac12\right)} \theta^{-\frac12}
+\end{align}
+
+As required, that is proportional to $\theta^{-\frac12}$. But it's an [improper prior](https://en.wikipedia.org/wiki/Prior_probability#Examples).
