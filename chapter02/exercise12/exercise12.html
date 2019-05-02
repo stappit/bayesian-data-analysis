@@ -192,7 +192,10 @@ $(document).ready(function () {
 
 
 <div style="display:none">
-<p><span class="math inline">\(\DeclareMathOperator{\binomial}{Binomial}  \DeclareMathOperator{\bernoulli}{Bernoulli}  \DeclareMathOperator{\poisson}{Poisson}  \DeclareMathOperator{\normal}{Normal}  \DeclareMathOperator{\studentt}{t}  \DeclareMathOperator{\cauchy}{Cauchy}  \DeclareMathOperator{\exponential}{Exp}  \DeclareMathOperator{\uniform}{Uniform}  \DeclareMathOperator{\gamma}{Gamma}  \DeclareMathOperator{\invgamma}{InvGamma}  \DeclareMathOperator{\invlogit}{InvLogit}  \DeclareMathOperator{\logit}{Logit}  \DeclareMathOperator{\dirichlet}{Dirichlet}  \newcommand{\EE}[1]{\mathbb{E}\mathopen{}\left[ #1 \right]\mathclose{}}  \newcommand{\Var}[1]{\mathrm{Var}\mathopen{}\left[ #1 \right]\mathclose{}}  \DeclareMathOperator{\beta}{Beta}\)</span></p>
+<p><span class="math display">\[
+  \newcommand{\EE}[1]{\mathbb{E}\mathopen{}\left[ #1 \right]\mathclose{}}
+  \newcommand{\Var}[1]{\mathrm{Var}\mathopen{}\left[ #1 \right]\mathclose{}}
+  \]</span></p>
 </div>
 <div id="chapter-2-exercise-9" class="section level2">
 <h2>Chapter 2 Exercise 9</h2>
@@ -229,6 +232,15 @@ Then, because <span class="math inline">\(y\)</span> has a Poisson distribution,
 \end{align}
 <p>Final step in the Jeffreys formula above is to apply the square root, giving us the Jeffreys’ prior for Poisson:</p>
 <p><span class="math display">\[ p(\theta) \propto \sqrt{I(\theta)} = \sqrt{\frac1{\theta}} = \theta^{-\frac12} \]</span></p>
+<p>To complete the exercise, we are also asked to find a parameterization of the Gamma distribution which is a close match to this:</p>
+<p><span class="math display">\[ \theta \sim Gamma(\alpha, \beta) \]</span></p>
+<p><span class="math display">\[ f(\theta | \alpha, \beta) = \frac{\beta^\alpha}{\Gamma(\alpha)} \theta^{\alpha-1} e^{-\beta\theta} \]</span></p>
+<p>This can be achieved by setting <span class="math inline">\(\alpha=\frac12\)</span> and <span class="math inline">\(\beta=0\)</span></p>
+\begin{align}
+f(\theta | \alpha, \beta) &amp; = \frac{0^\frac12}{\Gamma\left(\frac12\right)} \theta^{\frac12-1} e^{-0\theta}
+\\                          = \frac{0^\frac12}{\Gamma\left(\frac12\right)} \theta^{-\frac12}
+\end{align}
+<p>As required, that is proportional to <span class="math inline">\(\theta^{-\frac12}\)</span>. But it’s an <a href="https://en.wikipedia.org/wiki/Prior_probability#Examples">improper prior</a>.</p>
 </div>
 
 
