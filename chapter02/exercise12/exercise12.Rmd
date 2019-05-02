@@ -95,24 +95,3 @@ Then, because $y$ has a Poisson distribution, the mean and variance of $y$ are s
 Final step in the Jeffreys formula above is to apply the square root, giving us the Jeffreys' prior for Poisson:
 
 $$ p(\theta) \propto \sqrt{I(\theta)} = \sqrt{\frac1{\theta}} = \theta^{-\frac12} $$
-
-
-
-## Part A
-
-The marginal density of $y$ (a.k.a. the prior predictive distribution) is
-
-$$
-\begin{align}
-  p(y)
-  &=
-  p(y \mid \theta = 1) \cdot p(\theta = 1)
-  +
-  p(y \mid \theta = 2) \cdot p(\theta = 2)
-  \\
-  &=
-  \normal(y \mid 1, 2) \cdot 0.5
-  +
-  \normal(y \mid 2, 2) \cdot 0.5
-\end{align}
-$$
