@@ -14,24 +14,7 @@ output:
   $$
 </div>
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(
-  # cache = TRUE,
-  # dev = "svglite",
-  echo = TRUE,
-  comment = NA,
-  message = FALSE,
-  warning = TRUE,
-  error = TRUE
-)
 
-library(tidyverse)
-library(scales)
-library(kableExtra)
-library(here)
-
-theme_set(theme_bw())
-```
 
 ## Chapter 2 Exercise 9
 
