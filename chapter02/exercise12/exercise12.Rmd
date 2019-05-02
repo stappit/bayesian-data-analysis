@@ -6,22 +6,10 @@ output: html_document
 ---
 
 <div style="display:none">
-  $\DeclareMathOperator{\binomial}{Binomial}
-   \DeclareMathOperator{\bernoulli}{Bernoulli}
-   \DeclareMathOperator{\poisson}{Poisson}
-   \DeclareMathOperator{\normal}{Normal}
-   \DeclareMathOperator{\studentt}{t}
-   \DeclareMathOperator{\cauchy}{Cauchy}
-   \DeclareMathOperator{\exponential}{Exp}
-   \DeclareMathOperator{\uniform}{Uniform}
-   \DeclareMathOperator{\gamma}{Gamma}
-   \DeclareMathOperator{\invgamma}{InvGamma}
-   \DeclareMathOperator{\invlogit}{InvLogit}
-   \DeclareMathOperator{\logit}{Logit}
-   \DeclareMathOperator{\dirichlet}{Dirichlet}
-   \newcommand{\EE}[1]{\mathbb{E}\mathopen{}\left[ #1 \right]\mathclose{}}
-   \newcommand{\Var}[1]{\mathrm{Var}\mathopen{}\left[ #1 \right]\mathclose{}}
-   \DeclareMathOperator{\beta}{Beta}$
+  $$
+  \newcommand{\EE}[1]{\mathbb{E}\mathopen{}\left[ #1 \right]\mathclose{}}
+  \newcommand{\Var}[1]{\mathrm{Var}\mathopen{}\left[ #1 \right]\mathclose{}}
+  $$
 </div>
 
 ```{r setup, include=FALSE}
