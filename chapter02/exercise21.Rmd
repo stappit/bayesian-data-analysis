@@ -4,12 +4,20 @@ output: html_document
 ---
 
 ```{r setup, include=FALSE}
+<<<<<<< HEAD
 knitr::opts_chunk$set(echo = TRUE, comment = NA, warning = F)
+=======
+knitr::opts_chunk$set(echo = TRUE, comment = NA)
+>>>>>>> add exercise 21 plus required data
 ```
 
 
 ## Combining the data
+<<<<<<< HEAD
 The data is available from Gelmans [website](http://stat.columbia.edu/~gelman/book/data/). The data combines multiple surveys and asks various questions. There is thus a whole range of columns in the data frame.
+=======
+The data is available from Gelmans [website](). The data combines multiple surveys and asks various questions. There is thus a whole range of columns in the data frame.
+>>>>>>> add exercise 21 plus required data
 ```{r, message=F, warning=F}
 library(foreign)
 library(tidyverse)
@@ -81,8 +89,13 @@ $$\text{Liberals}_j \sim \text{Poisson}(n_j\theta_j))$$ where $n_j$ number of Su
 The conjugate prior for the Poisson distribution is the Gamma distribution $\text{Gamma}(\alpha, \beta)$ with shape parameter $\alpha$ and rate parameter $\beta$.
 We can use the Method of Moments to obtain estimates for our prior:
 ```{r}
+<<<<<<< HEAD
 ( rate <- mean( d$lib / d$n ) / var( d$lib / d$n ) )
 ( shape <- rate*mean( d$lib / d$n ) )
+=======
+rate <- mean( d$lib / d$n ) / var( d$lib / d$n )
+shape <- rate*mean( d$lib / d$n )
+>>>>>>> add exercise 21 plus required data
 ```
 
 This gives a prior that puts most probability mass between 0 and 0.1 for the rate parameter $\theta$.
