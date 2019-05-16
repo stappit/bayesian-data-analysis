@@ -1,0 +1,48 @@
+---
+title: "Exercise 4"
+author: "Sören Berg"
+date: "01 May 2019"
+output: html_document
+---
+
+## (a)
+
+The distribution for $\theta$ is discrete (note that the three probabilities given in the exercise sum up to one). 
+First, let $\theta=\frac{1}{12}$. The binomial distribution
+$\mathrm{Bin}(n,\theta)$ has mean $\frac{1000}{12}$ and standard deviation $\sqrt{1000\tfrac{1}{12}\tfrac{11}{12}}$, and we approximate the conditional distribution $p(y|\theta)$ with $\mathrm{N}\left(\frac{1000}{12}, \sqrt{1000\tfrac{1}{12}\tfrac{11}{12}}\right)$. The cases $\theta=1/6$ and $\theta=1/4$ can be handled analogously so that our approximation of the prior predictive distribution for $y$ is a sum (or mixture) of three normals. More precisely,
+
+$$
+p(y) = \sum_{\theta\in\{1/12,1/6,1/4\}}p(y|\theta) = \sum_{\theta\in\{1/12,1/6,1/4\}} p(\theta) p(y|\theta)
+$$
+
+is approximated with
+
+$$
+\mathrm{Pr}\left(\theta=\frac{1}{12}\right) \cdot \mathrm{N}\left(\frac{1000}{12},  \sqrt{1000\tfrac{1}{12}\tfrac{11}{12}}\right)
++ \mathrm{Pr}\left(\theta=\frac{1}{6}\right) \cdot \mathrm{N}\left(\frac{1000}{6},  \sqrt{1000\tfrac{1}{6}\tfrac{5}{6}}\right)
++ \mathrm{Pr}\left(\theta=\frac{1}{4}\right) \cdot \mathrm{N}\left(\frac{1000}{4},  \sqrt{1000\tfrac{1}{4}\tfrac{3}{4}}\right)
+$$
+
+Sketch:
+
+```{r}
+x <- seq(50,300, 1)
+y <- 1/4 * dnorm(x, 1000/12, sqrt(1000 \cdot 1/12*11/12)) + 1/2 * dnorm(x, 1000/6, sqrt(1000/cdot 1/6*5/6)) + 1/4 * dnorm(x, 1000/4, sqrt(1000*1/4*3/4))
+plot(x, y, type="l")
+```
+
+## (b)
+
+The sketch of the prior predictive distribution (alternatively one can compare the locations and standard deviations of the three normals analytically) shows that the overlap between the three bell-shaped curves are neglible for approximation purposes. The first (left-most) bell-shape curve describes $1/4$ of the overall mass of the prior predictive distribution. Therefore, the $5$% (or $\frac{1}{20}$) point is approximately the $4\frac{1}{20}=\frac{1}{5}$ (or $20$%) point of the first normal, which is
+
+```{r}
+qnorm(1/5, 1000/12, sqrt(1000*1/12*11/12))
+```
+
+The $25$% point, thus, lies between the first two bell-shaped curves at approximately $125$.
+Since the last normal describes $1/4$ of the overall mass, too, the $50$% point is approximately the mean of the second normal (at around $1000/6 = 166.6\ldots$).
+The $75$% lies between the second and third normal, approximately at around $205$ and the $95$% point is the approximately the $80$% point of the third normal at around
+
+```{r}
+qnorm(4/5, 1000/4, sqrt(1000*1/4*3/4))
+```
