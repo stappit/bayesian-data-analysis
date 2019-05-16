@@ -1,0 +1,146 @@
+---
+title: "Exercise 21"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, comment = NA)
+```
+
+
+## Combining the data
+The data is available from Gelmans [website](). The data combines multiple surveys and asks various questions. There is thus a whole range of columns in the data frame.
+```{r, message=F, warning=F}
+library(foreign)
+library(tidyverse)
+library(scales)
+
+pre <- read.dta("pew_research_center_june_elect_wknd_data.dta")
+election <- read.csv("2008ElectionResult.csv") %>%
+  mutate(state=tolower(state))
+
+colnames(pre)
+```
+
+We will concentrate here on the answer to question which political ideology the participant has:
+```{r}
+table(pre$ideo) / nrow(pre)
+```
+
+We want to estimate the percentage of the population in each state who label themselves as _very liberal_.
+We also need the abbreviations for each state:
+```{r}
+mapping <- tibble(state = tolower(state.name)) %>%
+   bind_cols(tibble(abb = state.abb)) %>% 
+   bind_rows(tibble(state = c("washington dc", "district of columbia"), 
+                    abb = c("DC", "DC")))
+
+election <- election %>%
+  left_join(mapping, by="state") %>%
+  select(-state)
+```
+
+We aggregate the survey data by state so that we get a proportion estimate of liberals based on the survey:
+```{r}
+d <- pre %>% 
+  filter( !is.na( ideo ) ) %>%
+  select(state, ideo) %>%
+  group_by(state) %>%
+  summarise(lib=sum(ideo == "very liberal"), n=n()) %>%
+  left_join(mapping, by="state") %>%
+  left_join(election, by="abb") %>%
+  mutate(lib.prop = lib / n ,
+         obama_vote_share = vote_Obama_pct / 100,
+         obama_won = vote_Obama_pct > 50)
+
+d  
+```
+
+## Graph proportions vs vote-share
+```{r, fig.height=6, fig.width=6}
+d %>%
+  ggplot(aes(x=lib.prop, y=obama_vote_share, label=abb, col=obama_won)) +
+  geom_hline(yintercept = 0.5, col="grey", size=1) +
+  geom_text(show.legend = F, size=3) +
+  theme_minimal() +
+  scale_color_brewer(palette="Set1") + 
+  scale_y_continuous(labels = percent,
+                     name = "Proportion of Obama Votes",
+                     limits = c(0,1)) +
+  scale_x_continuous(labels = percent,
+                     name = "Proportion of Liberals in Survey",
+                     limits = c(0, 0.15) )
+```
+
+We see that some states had a high proportion of liberals in the survey but a low proportion of votes for Obama in the election.
+
+## Graph Bayes posterior mean vs vote-share
+We assume that the number of liberals in the survey follows a Poisson distribution:
+$$\text{Liberals}_j \sim \text{Poisson}(n_j\theta_j))$$ where $n_j$ number of Survey participants and $\theta$ is the underlying rate of liberals (that is, close to the proportion of votes for Obama) in state $j$.
+
+The conjugate prior for the Poisson distribution is the Gamma distribution $\text{Gamma}(\alpha, \beta)$ with shape parameter $\alpha$ and rate parameter $\beta$.
+We can use the Method of Moments to obtain estimates for our prior:
+```{r}
+rate <- mean( d$lib / d$n ) / var( d$lib / d$n )
+shape <- rate*mean( d$lib / d$n )
+```
+
+This gives a prior that puts most probability mass between 0 and 0.1 for the rate parameter $\theta$.
+```{r}
+curve(dgamma(x, shape=shape, rate=rate), from=0, to=0.3)
+hist(d$lib / d$n , add=T)
+```
+
+The posterior for Gamma is then $\text{Gamma}(\alpha + \sum_i^n y_i, \beta + \sum_i^n x_i)$ from which we can estimate the posterior mean.
+```{r, fig.height=7, fig.width=7}
+d %>%
+  mutate(post_shape = shape + lib,
+         post_rate = rate + n,
+         post_mean = post_shape / post_rate ) %>%
+  ggplot(aes(y=obama_vote_share, x=post_mean, label=abb, col=obama_won)) +
+  geom_hline(yintercept = 0.5, col="grey", size=1) +
+  geom_text(show.legend = F, size=3) +
+  theme_minimal() +
+  scale_color_brewer(palette="Set1") + 
+  scale_y_continuous(labels = percent,
+                     name = "Proportion of Obama Votes") +
+  scale_x_continuous(labels = percent,
+                     name = "Bayesian Mean of Proportion in Survey",
+                     limits = c(0, 0.15) )
+```
+
+
+
+
+## Graph proportion vs number of survey-participants
+```{r}
+d %>%
+  ggplot(aes(x=n, y=lib.prop, label=abb, col=obama_won)) +
+  geom_text(show.legend = F, size=3) +
+  theme_minimal() +
+  scale_color_brewer(palette="Set1") +
+  scale_x_continuous(name = "Number of Survey Participants") +
+  scale_y_continuous(labels = percent,
+                     name ="Proportion of Liberals in Survey",
+                     limits = c(0,0.15))
+```
+
+
+
+## Graph Bayesian estimate vs number of survey-participants
+
+```{r, fig.height=7, fig.width=7}
+d %>%
+  mutate(post_shape = shape + lib,
+         post_rate = rate + n,
+         post_mean = post_shape / post_rate ) %>%
+  ggplot(aes(x=n, y=post_mean, label=abb, col=obama_won)) +
+  geom_text(show.legend = F, size=3) +
+  theme_minimal() +
+  scale_color_brewer(palette="Set1") + 
+  scale_x_continuous(name = "Number of Survey Participants") +
+  scale_y_continuous(labels = percent,
+                     name = "Bayesian Mean of Proportion in Survey",
+                     limits = c(0, 0.15) )
+```
+
