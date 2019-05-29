@@ -5,19 +5,27 @@ output: html_document
 
 ```{r setup, include=FALSE}
 <<<<<<< HEAD
+<<<<<<< HEAD
 knitr::opts_chunk$set(echo = TRUE, comment = NA, warning = F)
 =======
 knitr::opts_chunk$set(echo = TRUE, comment = NA)
 >>>>>>> add exercise 21 plus required data
+=======
+knitr::opts_chunk$set(echo = TRUE, comment = NA, warning = F)
+>>>>>>> render exercise 21
 ```
 
 
 ## Combining the data
 <<<<<<< HEAD
+<<<<<<< HEAD
 The data is available from Gelmans [website](http://stat.columbia.edu/~gelman/book/data/). The data combines multiple surveys and asks various questions. There is thus a whole range of columns in the data frame.
 =======
 The data is available from Gelmans [website](). The data combines multiple surveys and asks various questions. There is thus a whole range of columns in the data frame.
 >>>>>>> add exercise 21 plus required data
+=======
+The data is available from Gelmans [website](http://stat.columbia.edu/~gelman/book/data/). The data combines multiple surveys and asks various questions. There is thus a whole range of columns in the data frame.
+>>>>>>> render exercise 21
 ```{r, message=F, warning=F}
 library(foreign)
 library(tidyverse)
@@ -90,12 +98,17 @@ The conjugate prior for the Poisson distribution is the Gamma distribution $\tex
 We can use the Method of Moments to obtain estimates for our prior:
 ```{r}
 <<<<<<< HEAD
+<<<<<<< HEAD
 ( rate <- mean( d$lib / d$n ) / var( d$lib / d$n ) )
 ( shape <- rate*mean( d$lib / d$n ) )
 =======
 rate <- mean( d$lib / d$n ) / var( d$lib / d$n )
 shape <- rate*mean( d$lib / d$n )
 >>>>>>> add exercise 21 plus required data
+=======
+( rate <- mean( d$lib / d$n ) / var( d$lib / d$n ) )
+( shape <- rate*mean( d$lib / d$n ) )
+>>>>>>> render exercise 21
 ```
 
 This gives a prior that puts most probability mass between 0 and 0.1 for the rate parameter $\theta$.
