@@ -1,0 +1,124 @@
+---
+title: "Bioassay Experiment"
+author: "Corrie"
+date: "5/29/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(ggplot2)
+library(dplyr)
+```
+
+## A frequentist approach
+To get a rough estimate around where we should plot our grid, we first compute the maximum likelihood estimate using the standard logistic regression tools.
+```{r}
+d <- data.frame(log.dose=c(rep(-0.86, 5), rep(-0.3,5), rep(-0.05,5), rep(0.73,5) ),
+                death=c(rep(0,5), 1, rep(0,4), rep(1, 3), 0, 0, rep(1, 5)) )
+
+fit <- glm(death ~ 1 + log.dose,
+          data=d,
+          family="binomial")
+
+summary(fit)
+```
+
+The estimate is $(\hat{\alpha}, \hat{\beta}) = (0.85, 7.75)$ with standard errors of 1.0 and 4.9 for $\alpha$ and $\beta$, respectively.
+
+# Approximating the posterior using a grid
+```{r}
+d <- data.frame(log.dose = c(-0.86, -0.3, -0.05, 0.73),
+                n.animals = c(5, 5, 5, 5),
+                n.deaths = c(0, 1, 3, 5))
+
+
+logit <- function(x) log(x / (1-x) )
+
+
+log.lkhd <- function(alpha, beta) {
+  lin <- alpha + beta * d$log.dose
+  y <- d$n.deaths; n <- d$n.animals
+  sum( y*(lin - log( 1 + exp(lin ) )) + ( n-y )*(-log(1 + exp(lin))) )
+}
+
+prior <- function(alpha, beta) {
+  1
+}
+
+grid_size <- 100
+alpha_seq <- seq(-5, 10, length.out=grid_size)
+beta_seq <- seq(-10, 40, length.out=grid_size)
+
+alpha_width <- alpha_seq[2] - alpha_seq[1]
+beta_width <- beta_seq[2] - beta_seq[1]
+
+post.grid <- expand.grid(alpha = alpha_seq, 
+                         beta = beta_seq ) %>%
+  rowwise %>%
+  mutate(loglkhd = log.lkhd(alpha, beta),
+         prior = prior(alpha, beta)) %>%
+  mutate(log.post = loglkhd + log(prior) ) %>%
+  ungroup() %>%
+  mutate(log.postm = log.post - max(log.post),
+         un.post = exp(log.postm),
+         post = un.post / sum(un.post))
+
+mode <- max(post.grid$post)
+breaks <- seq(0.05, 0.95, by=0.1) * mode
+  
+```
+
+```{r, fig.height=5, fig.width=5}
+post.grid %>%
+  ggplot(aes(x=alpha, y=beta, z=post)) + 
+  stat_contour(breaks=breaks) +
+  ylim(-10, 40) +
+  scale_x_continuous(breaks=c(-4, -2, 0, 2, 4, 6, 8, 10), 
+                     limits = c(-5, 10)) +
+  theme_minimal() +
+  labs(title="Posterior density")
+```
+
+# Sampling from the posterior
+```{r}
+marg.alpha <- post.grid %>%
+  group_by(alpha) %>%
+  summarise(post = sum(post)) %>%
+  pull(post)
+
+N <- 1000
+alpha.sample <- sample(seq(-5, 10, length.out = 100), N, replace=T, prob=marg.alpha)
+
+beta.sample <- c()
+for(i in 1:N) {
+  cond.beta <- post.grid %>%
+    filter(alpha == alpha.sample[i]) %>%
+    mutate(post = post / sum(post)) %>%
+    pull(post)
+  bsamp <- sample(seq(-10, 40, length.out = 100), 1, prob=cond.beta)
+  beta.sample[i] <- bsamp
+}
+
+# add random jitter
+alpha.sample <- alpha.sample + runif(N, min = 0 - alpha_width/2,
+                                        max = 0 + alpha_width/2)
+beta.sample <- beta.sample + runif(N, min = 0 - beta_width/2, 
+                                      max = 0 + beta_width/2 )
+```
+
+```{r, fig.height=5, fig.width=5}
+data.frame(alpha = alpha.sample,
+           beta = beta.sample) %>%
+  ggplot(aes(x=alpha, y=beta)) +
+  geom_point(size=0.5) +
+  ylim(-10, 40) +
+  scale_x_continuous(breaks=c(-4, -2, 0, 2, 4, 6, 8, 10), 
+                     limits = c(-5, 10)) +
+  theme_minimal() +
+  labs(title="Posterior sample")
+```
+
