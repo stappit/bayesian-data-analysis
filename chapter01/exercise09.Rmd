@@ -8,12 +8,17 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE, comment=NA)
 ```
 
+```{r}
+library(tidyverse)
+```
+
+
 A clinic has three doctors. Patients come into the clinic at random, starting at 9am, according to a Poisson process with time parameter 10 minutes; that is, the time after opening at which the first patient appears follows an exponential distribution with expectation 10 minutes and then, after each patient arrives, the waiting time until the next patient arrives is independently exponentially distributed, also with expectation 10 minutes. When a patient arrives, s/he waits until a doctor is available. The amount of time spent by each doctor with each patient is a random variable, uniformly distributed between 5 and 20 minutes. The office stops admitting new patients at 4pm and closes when the last patient is through with the doctor.
 
 
-We observe 7 hours (from 9am to 4pm) of patients arriving. That is `r 7*60` minutes. We thus sample patient arrival times (actually, waiting time between the arrival of two patients) from $\text{Poisson}(\lambda=10)$ a number of times, until the sum of arrival times is above 420. Or, in a vectorized way, we sample a generous amount of arrival times (say $n=100$) and discard all for which the sum is above 420.
+We observe 7 hours (from 9am to 4pm) of patients arriving. That is `r 7*60` minutes. We thus sample patient arrival times (actually, waiting time between the arrival of two patients) from $\text{Exp}(\theta=1/10)$ a number of times, until the sum of arrival times is above 420. Or, in a vectorized way, we sample a generous amount of arrival times (say $n=100$) and discard all for which the sum is above 420.
 ```{r}
-patients <- rpois(n=100, lambda=10)
+patients <- rexp(n=100, rate=1/10)
 arrival_times <- cumsum(patients)
 arrival_times <- arrival_times[arrival_times <= 420 ]
 
@@ -28,39 +33,51 @@ consultation_time <- runif(num_patients, min=5, max=20)
 
 Since we already now in advance how long a doctor will spend with a patient, we also already know in advance will be available next. So everytime a new patient arrives, we check which doctor will be soonest available and then add the consultation time of this patient to the time the doctor will be next available.
 ```{r}
-simulate <- function(num_doctors=3){
-  patients <- rpois(n=100, lambda=10)
+simulate <- function(num_doctors=3, mean_wait_time=10,
+                     opening_time=9, closing_time=16, 
+                     min_consul_time=5,
+                     max_consul_time=20){
+  
+  hours <- closing_time - opening_time
+  minutes <- hours * 60
+  patients <- rexp(n=200, rate=1/mean_wait_time)
   arrival_times <- cumsum(patients)
-  arrival_times <- arrival_times[arrival_times <= 420 ]
+  arrival_times <- arrival_times[arrival_times <= minutes ]
   
   
   num_patients <- length(arrival_times) 
   
-  consultation_time <- runif(num_patients, min=5, max=20)
+  consultation_time <- runif(num_patients, min=min_consul_time, max=max_consul_time)
   
-  # initiate doctors with first three patients
-  doctors <- rep(0, num_doctors) + arrival_times[1:num_doctors]
-  # waiting time for first three patients is thus 0
-  waiting_times <- rep(0, num_doctors)
-  for (i in (num_doctors+1):num_patients) {
+  # initiate doctors 
+  doctors <- rep(0, num_doctors)  
+  # waiting time 
+  waiting_times <- c()
+  num_waiters <- 0
+  for (i in 1:num_patients) {
     # which doctor will be next available?
-    doctors <- sort(doctors)
-    # what comes last, doctor becomes free or patient arrives?
-    if (doctors[1] > arrival_times[i]) {
-      enter_room <- doctors[1]
+    next_free_doctor <- which.min(doctors)
+    # what time will the doctor be available?
+    next_free_doctor_time <- doctors[next_free_doctor]
+    # does the patient have to wait?
+    if (next_free_doctor_time > arrival_times[i]) {
+      enter_room <- next_free_doctor_time
       waiting_times[i] <- enter_room - arrival_times[i]
+      num_waiters <- num_waiters + 1
     } else {
       enter_room <- arrival_times[i]
       waiting_times[i] <- 0
     }
     leave_room <- enter_room + consultation_time[i]
-    doctors[1] <- leave_room
+    doctors[next_free_doctor] <- leave_room
   }
-  num_waiters <- sum( waiting_times > 0 )
+  #num_waiters <- sum( waiting_times > 0 )
   office_close <- max(doctors)
-  avg_wait <- mean(waiting_times)
-  res <- c(num_patients, num_waiters, office_close, avg_wait)
-  names(res) <- c("num_patients", "num_waiters", "office_close", "avg_wait")
+  avg_wait_all <- mean(waiting_times)
+  avg_wait <- mean( waiting_times[waiting_times > 0 ])
+  rel_closing <- office_close - 420
+  res <- c(num_patients, num_waiters, office_close, rel_closing, avg_wait_all, avg_wait)
+  names(res) <- c("num_patients", "num_waiters", "office_close", "rel_closing", "avg_wait_all", "avg_wait")
   as.data.frame(t(res))
 }
 
@@ -69,13 +86,24 @@ simulate()
 
 We can now easily simulate the process multiple times:
 ```{r}
-library(purrr)
-num_sims <- 100
+num_sims <- 10000
 sims <- map_dfr(1:num_sims, .f=function(x) {simulate(num_doctors = 3) } )
 ```
 
 From this, we can estimate the median and 50% interval for the number of patients in a day, how many patients have to wait, the closing time of the office and the average waiting time.
 ```{r}
 summary(sims)
+```
+
+```{r, fig.height=8, fig.width=8, dpi=400}
+sims %>%
+  select(-office_close) %>%
+  replace_na(list(avg_wait = 0)) %>%
+  pivot_longer(everything()) %>%
+  ggplot(aes(x=value)) +
+  geom_histogram(bins=20, fill="#377EB8", col="white") +
+  facet_wrap(~name, scales="free") +
+  theme_minimal()
+  
 ```
 
