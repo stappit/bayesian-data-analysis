@@ -6,14 +6,35 @@ output: html_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE, comment = NA)
 ```
 
-```{r}
+```{r, warning=F, message=F}
 library(ggplot2)
 library(dplyr)
 ```
+This example is a nonconjugate model for a bioassay experiment. It is a two-parameter example from the class of generalized linear models. Here, we use a simulation grid-approximation approach to get the posterior distribution.
 
+## The data
+To test how toxic a drug is, it is often given to animals at various doses and then observed how many have adverse outcomes. Often, the response is simply a dicothomous outcome: animal alive or dead.
+An example of such data:
+```{r}
+d <- data.frame(log.dose=c(-0.86, -0.3, -0.05, 0.73),
+                n_animals=c(5,5,5,5),
+                n_deaths=c(0,1,3,5))
+d %>% knitr::kable()
+```
+
+## The model
+It is reasonable to model the outcomes of the five animals _within each group_ as exchangeable and independent. The data points $y_i$=`n_deaths` are then binomially distributed:
+$$y_i | \theta_i \sim \text{Bin}(n_i, \theta)$$
+where $n_i$ is the number of animals (in this example it is 5 for each group).
+
+We model the response $\theta$ by the dose using a linear model together with a logit-link:
+$$\text{logit}(\theta_i)  = \alpha + \beta x_i$$
+This is called a logistic regression model.
+
+We will estimate this model using a grid. To know where we need to span the grid, we first use a frequentist approach to get an estimate.
 ## A frequentist approach
 To get a rough estimate around where we should plot our grid, we first compute the maximum likelihood estimate using the standard logistic regression tools.
 ```{r}
@@ -30,6 +51,7 @@ summary(fit)
 The estimate is $(\hat{\alpha}, \hat{\beta}) = (0.85, 7.75)$ with standard errors of 1.0 and 4.9 for $\alpha$ and $\beta$, respectively.
 
 # Approximating the posterior using a grid
+First, we define some functions.
 ```{r}
 d <- data.frame(log.dose = c(-0.86, -0.3, -0.05, 0.73),
                 n.animals = c(5, 5, 5, 5),
@@ -37,18 +59,25 @@ d <- data.frame(log.dose = c(-0.86, -0.3, -0.05, 0.73),
 
 
 logit <- function(x) log(x / (1-x) )
+```
 
-
+We compute the log posterior using the log likelihood. This helps to avoid numerical problems.
+Simplifying some of the expressions, we get the following function for the log likelihood:
+```{r}
 log.lkhd <- function(alpha, beta) {
   lin <- alpha + beta * d$log.dose
   y <- d$n.deaths; n <- d$n.animals
   sum( y*(lin - log( 1 + exp(lin ) )) + ( n-y )*(-log(1 + exp(lin))) )
 }
-
+```
+Next, we define a prior function. Since we use a uniform prior, we just define a constant function:
+```{r}
 prior <- function(alpha, beta) {
   1
 }
-
+```
+Next, we define our grid and a function to compute the posterior:
+```{r}
 grid_size <- 100
 alpha_seq <- seq(-5, 10, length.out=grid_size)
 beta_seq <- seq(-10, 40, length.out=grid_size)
@@ -57,7 +86,10 @@ alpha_width <- alpha_seq[2] - alpha_seq[1]
 beta_width <- beta_seq[2] - beta_seq[1]
 
 post.grid <- expand.grid(alpha = alpha_seq, 
-                         beta = beta_seq ) %>%
+                         beta = beta_seq ) 
+
+posterior.grid <- function(grid, prior_fun=prior) {
+  grid %>%
   rowwise %>%
   mutate(loglkhd = log.lkhd(alpha, beta),
          prior = prior(alpha, beta)) %>%
@@ -65,14 +97,20 @@ post.grid <- expand.grid(alpha = alpha_seq,
   ungroup() %>%
   mutate(log.postm = log.post - max(log.post),
          un.post = exp(log.postm),
-         post = un.post / sum(un.post))
-
+         # normalize the posterior
+         post = un.post / sum(un.post)) %>%
+    select(-log.postm, -un.post)
+}
+```
+Now, we compute the posterior:
+```{r}
+post.grid <- posterior.grid(post.grid)
+```
+We can plot the posterior density as contour lines. To get the right contour lines, we use the mode and multiply it with 0.05, 0.1, 0.15, ..., 0.95.
+```{r, fig.height=5, fig.width=5}
 mode <- max(post.grid$post)
 breaks <- seq(0.05, 0.95, by=0.1) * mode
-  
-```
 
-```{r, fig.height=5, fig.width=5}
 post.grid %>%
   ggplot(aes(x=alpha, y=beta, z=post)) + 
   stat_contour(breaks=breaks) +
@@ -84,15 +122,24 @@ post.grid %>%
 ```
 
 # Sampling from the posterior
+To sample from the posterior, we take the following steps:
+1. Compute the marginal posterior distribution of $\alpha$ by numerically summing over $\beta$:
 ```{r}
 marg.alpha <- post.grid %>%
   group_by(alpha) %>%
   summarise(post = sum(post)) %>%
   pull(post)
+```
 
+2. For $s = 1, ..., 1000$ (or more if you want to have more samples), 
+  a) Draw samples from $p(\alpha | y)$:
+```{r}
 N <- 1000
 alpha.sample <- sample(seq(-5, 10, length.out = 100), N, replace=T, prob=marg.alpha)
-
+```
+  
+  b) Draw $\beta$ from the discrete conditional distribution $p(\beta | \alpha, y)$ given the just-sampled value of $\alpha$:
+```{r}
 beta.sample <- c()
 for(i in 1:N) {
   cond.beta <- post.grid %>%
@@ -102,17 +149,49 @@ for(i in 1:N) {
   bsamp <- sample(seq(-10, 40, length.out = 100), 1, prob=cond.beta)
   beta.sample[i] <- bsamp
 }
-
-# add random jitter
+```
+  
+  c) For each of the sampled $\alpha$ and $\beta$, add a uniform random jitter, centered at zero with a width equal to the spacing of the sampling grid, This gives the simulation draws a continuous distribution:
+```{r}
 alpha.sample <- alpha.sample + runif(N, min = 0 - alpha_width/2,
                                         max = 0 + alpha_width/2)
 beta.sample <- beta.sample + runif(N, min = 0 - beta_width/2, 
                                       max = 0 + beta_width/2 )
 ```
 
+The whole thing as a function:
+```{r}
+extract.sample <- function(post.grid, N=1000) {
+  marg.alpha <- post.grid %>%
+  group_by(alpha) %>%
+  summarise(post = sum(post)) %>%
+  pull(post)
+  
+  alpha.sample <- sample(seq(-5, 10, length.out = 100), N, replace=T, prob=marg.alpha)
+  beta.sample <- c()
+  for(i in 1:N) {
+    cond.beta <- post.grid %>%
+      filter(alpha == alpha.sample[i]) %>%
+      mutate(post = post / sum(post)) %>%
+      pull(post)
+    bsamp <- sample(seq(-10, 40, length.out = 100), 1, prob=cond.beta)
+    beta.sample[i] <- bsamp
+  }
+  alpha.sample <- alpha.sample + runif(N, min = 0 - alpha_width/2,
+                                        max = 0 + alpha_width/2)
+  beta.sample <- beta.sample + runif(N, min = 0 - beta_width/2, 
+                                      max = 0 + beta_width/2 )
+  
+  data.frame(alpha = alpha.sample,
+           beta = beta.sample)
+}
+```
+
+We can now plot the posterior sample:
 ```{r, fig.height=5, fig.width=5}
-data.frame(alpha = alpha.sample,
-           beta = beta.sample) %>%
+post.sample <- extract.sample(post.grid)
+
+post.sample %>%
   ggplot(aes(x=alpha, y=beta)) +
   geom_point(size=0.5) +
   ylim(-10, 40) +
@@ -122,3 +201,35 @@ data.frame(alpha = alpha.sample,
   labs(title="Posterior sample")
 ```
 
+## Posterior Distribution of the LD50
+We can use the posterior sample to compute the LD50 - the dose level at which probability of death is 50%.
+In our logistic model, a 50% survival rate means
+$$\begin{align*}
+\text{LD50}: && E(\frac{y_i}{n_i}) = \text{logit}^{-1}(\alpha + \beta x_i) = 0.5
+\end{align*}$$
+Thus $\alpha + \beta x_i = \text{logit}(0.5) = 0$ and the LD50 is $x_i = -\alpha / \beta$.
+
+*Attention:* In this example, LD50 is a meaningless concept if $\beta \leq 0$, in which case increasing the dose does not cause the probability of death to increase.
+
+We report:
+
+(1) The posterior probability that $\beta > 0$, that is, that the drug is harmful:
+```{r}
+mean(post.sample$beta > 0)
+```
+
+From this, we can conclude that the posterior probability of $\beta > 0$ is roughly estimated to exceed 0.999.
+
+(2) The posterior distribution for the LD50 conditional on $\beta > 0$. All draws had positive values of $\beta$, so the distribution is given by the whole sample:
+```{r}
+post.sample %>%
+  mutate( LD50 = - alpha / beta) %>%
+  ggplot(aes(x=LD50)) + 
+  geom_histogram(bins=50, 
+                 fill="#377EB8", col="white") +
+  scale_y_continuous(labels = NULL, name="") +
+  theme_minimal()
+```
+
+
+# Different priors
