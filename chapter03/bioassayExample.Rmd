@@ -13,22 +13,36 @@ knitr::opts_chunk$set(echo = TRUE, comment = NA)
 
 ```{r, warning=F, message=F}
 library(ggplot2)
+library(mvtnorm)
 library(dplyr)
+library(cowplot)
 ```
 This example is a nonconjugate model for a bioassay experiment. It is a two-parameter example from the class of generalized linear models. Here, we use a simulation grid-approximation approach to get the posterior distribution.
 
 ## The data
-To test how toxic a drug is, it is often given to animals at various doses and then observed how many have adverse outcomes. Often, the response is simply a dicothomous outcome: animal alive or dead.
+To test how toxic a drug is, it is often given to animals at various doses and then observed how many have adverse outcomes. Often, the response is simply a dichothomous outcome: animal alive or dead.
 An example of such data:
 ```{r}
 d <- data.frame(log.dose=c(-0.86, -0.3, -0.05, 0.73),
-                n_animals=c(5,5,5,5),
-                n_deaths=c(0,1,3,5))
+                n.animals=c(5,5,5,5),
+                n.deaths=c(0,1,3,5))
 d %>% knitr::kable()
 ```
 
+```{r}
+d <- d %>%
+  mutate(prop=n.deaths / n.animals) 
+d %>%
+  ggplot(aes(x=log.dose, y=prop)) +
+  geom_point(col="#E41A1C") +
+  theme_minimal() +
+  labs(y="Proportion of deaths",
+       x="Dose (log g/ml")
+```
+
+
 ## The model
-It is reasonable to model the outcomes of the five animals _within each group_ as exchangeable and independent. The data points $y_i$=`n_deaths` are then binomially distributed:
+It is reasonable to model the outcomes of the five animals _within each group_ as exchangeable and independent. The data points $y_i$=`n.deaths` are then binomially distributed:
 $$y_i | \theta_i \sim \text{Bin}(n_i, \theta)$$
 where $n_i$ is the number of animals (in this example it is 5 for each group).
 
@@ -77,11 +91,11 @@ We will estimate this model using a grid. To know where we need to span the grid
 ## A frequentist approach
 To get a rough estimate around where we should plot our grid, we first compute the maximum likelihood estimate using the standard logistic regression tools.
 ```{r}
-d <- data.frame(log.dose=c(rep(-0.86, 5), rep(-0.3,5), rep(-0.05,5), rep(0.73,5) ),
+d.notagg <- data.frame(log.dose=c(rep(-0.86, 5), rep(-0.3,5), rep(-0.05,5), rep(0.73,5) ),
                 death=c(rep(0,5), 1, rep(0,4), rep(1, 3), 0, 0, rep(1, 5)) )
 
 fit <- glm(death ~ 1 + log.dose,
-          data=d,
+          data=d.notagg,
           family="binomial")
 
 summary(fit)
@@ -99,14 +113,13 @@ First, we define some functions.
 First, we define some functions.
 >>>>>>> bioassay example finished
 ```{r}
-d <- data.frame(log.dose = c(-0.86, -0.3, -0.05, 0.73),
-                n.animals = c(5, 5, 5, 5),
-                n.deaths = c(0, 1, 3, 5))
-
-
 logit <- function(x) log(x / (1-x) )
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+invlogit <- function(x) exp(x) / (1 + exp(x))
+>>>>>>> Bioassay example and Exercise 11
 ```
 
 We compute the log posterior using the log likelihood. This helps to avoid numerical problems.
@@ -154,6 +167,8 @@ prior <- function(alpha, beta) {
   1
 }
 ```
+
+
 Next, we define our grid and a function to compute the posterior:
 ```{r}
 >>>>>>> bioassay example finished
@@ -181,7 +196,7 @@ posterior.grid <- function(grid, prior_fun=prior) {
 >>>>>>> bioassay example finished
   rowwise %>%
   mutate(loglkhd = log.lkhd(alpha, beta),
-         prior = prior(alpha, beta)) %>%
+         prior = prior_fun(alpha, beta)) %>%
   mutate(log.post = loglkhd + log(prior) ) %>%
   ungroup() %>%
   mutate(log.postm = log.post - max(log.post),
@@ -191,7 +206,8 @@ posterior.grid <- function(grid, prior_fun=prior) {
 =======
 >>>>>>> bioassay example finished
          # normalize the posterior
-         post = un.post / sum(un.post)) %>%
+         post = un.post / sum(un.post),
+         prior = prior / sum(prior) ) %>%
     select(-log.postm, -un.post)
 }
 ```
@@ -205,6 +221,7 @@ We can plot the posterior density as contour lines. To get the right contour lin
 mode <- max(post.grid$post)
 breaks <- seq(0.05, 0.95, by=0.1) * mode
 
+<<<<<<< HEAD
 =======
          post = un.post / sum(un.post))
 
@@ -219,13 +236,17 @@ breaks <- seq(0.05, 0.95, by=0.1) * mode
 =======
 >>>>>>> bioassay example finished
 post.grid %>%
+=======
+unf_post_plot <- post.grid %>%
+>>>>>>> Bioassay example and Exercise 11
   ggplot(aes(x=alpha, y=beta, z=post)) + 
-  stat_contour(breaks=breaks) +
+  stat_contour(breaks=breaks, col="#377EB8") +
   ylim(-10, 40) +
   scale_x_continuous(breaks=c(-4, -2, 0, 2, 4, 6, 8, 10), 
                      limits = c(-5, 10)) +
   theme_minimal() +
-  labs(title="Posterior density")
+  labs(title="Posterior density", subtitle = "with uniform prior")
+unf_post_plot
 ```
 
 # Sampling from the posterior
@@ -312,8 +333,15 @@ beta.sample <- beta.sample + runif(N, min = 0 - beta_width/2,
 >>>>>>> bioassay example finished
 The whole thing as a function:
 ```{r}
-extract.sample <- function(post.grid, N=1000) {
-  marg.alpha <- post.grid %>%
+extract.sample <- function(density.grid, N=1000, prior=FALSE) {
+  if (prior) {
+    density.grid <- density.grid %>%
+      select(alpha, beta, post=prior)
+  } else {
+    density.grid <- density.grid %>%
+      select(alpha,  beta, post)
+  }
+  marg.alpha <- density.grid %>%
   group_by(alpha) %>%
   summarise(post = sum(post)) %>%
   pull(post)
@@ -321,7 +349,7 @@ extract.sample <- function(post.grid, N=1000) {
   alpha.sample <- sample(seq(-5, 10, length.out = 100), N, replace=T, prob=marg.alpha)
   beta.sample <- c()
   for(i in 1:N) {
-    cond.beta <- post.grid %>%
+    cond.beta <- density.grid %>%
       filter(alpha == alpha.sample[i]) %>%
       mutate(post = post / sum(post)) %>%
       pull(post)
@@ -366,8 +394,53 @@ post.sample %>%
 
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 >>>>>>> bioassay example finished
+=======
+We can plot the samples as the resulting logistic model together with the data:
+```{r}
+plot_samples <- function(sample, n=100, title="Posterior samples", subtitle="") {
+  log.dose <- seq(-1.5, 1.5, length.out = 100)
+
+  sample %>%
+    sample_n(size=n) %>%
+    mutate(id=1:n) %>%
+    purrr::pmap_df(~tibble(log.dose=log.dose, id=..3,
+                          prop=invlogit(..1 + ..2*log.dose))) %>%
+    ggplot(aes(x=log.dose, y=prop)) +
+    geom_line(aes(group=id), alpha=0.2, col="#377EB8") +
+    geom_hline(yintercept=0.5, linetype='dashed', col="grey") +
+    geom_point(data=d, col="#E41A1C") +
+    theme_minimal() +
+    labs(x="Dose (log g/ml)", y="Proportion of deaths",
+         title=title, subtitle = subtitle)
+}
+plot_samples(post.sample)
+```
+
+Note that we can also sample and visualize our prior distribution:
+```{r, warning=F, fig.height=5, fig.width=5}
+prior.sample <- extract.sample(post.grid, prior=TRUE)
+
+prior.sample %>%
+  ggplot(aes(x=alpha, y=beta)) +
+  geom_point(size=0.5) +
+  ylim(-10, 40) +
+  scale_x_continuous(breaks=c(-4, -2, 0, 2, 4, 6, 8, 10), 
+                     limits = c(-5, 10)) +
+  theme_minimal() +
+  labs(title="Prior sample")
+```
+
+The prior is uniform and thus not very spectacular. For the logistic model, this then looks as follows:
+```{r}
+plot_samples(prior.sample, n=200, title="Prior samples")
+```
+
+
+
+>>>>>>> Bioassay example and Exercise 11
 ## Posterior Distribution of the LD50
 We can use the posterior sample to compute the LD50 - the dose level at which probability of death is 50%.
 In our logistic model, a 50% survival rate means
@@ -388,20 +461,192 @@ mean(post.sample$beta > 0)
 From this, we can conclude that the posterior probability of $\beta > 0$ is roughly estimated to exceed 0.999.
 
 (2) The posterior distribution for the LD50 conditional on $\beta > 0$. All draws had positive values of $\beta$, so the distribution is given by the whole sample:
-```{r}
-post.sample %>%
-  mutate( LD50 = - alpha / beta) %>%
+```{r, warning=F}
+LD50_samps <- post.sample %>%
+  mutate( LD50 = - alpha / beta) 
+LD50.mean <- LD50_samps %>%
+  summarise(mean = mean(LD50))
+
+unif.LD50.plot <- LD50_samps %>%
   ggplot(aes(x=LD50)) + 
   geom_histogram(bins=50, 
                  fill="#377EB8", col="white") +
   scale_y_continuous(labels = NULL, name="") +
-  theme_minimal()
+  xlim(-0.6, 0.7) +
+  geom_vline(data=LD50.mean, aes(xintercept=mean), col="#E41A1C") +
+  theme_minimal() +
+  labs(title="Posterior distribution for the LD50",
+       subtitle="with uniform prior")
+unif.LD50.plot
+```
+
+We can incorporate the LD50 data in the plot of the logistic model:
+```{r, fig.height=6, fig.width=7}
+plot_samples(post.sample) +
+  geom_point(data=LD50_samps[1:100,], 
+             aes(x=LD50, y=0.5), alpha=0.3, size=0.5)
+```
+
+# A different prior
+We want to replace the uniform prior density by a joint normal prior distribution on $(\alpha, \beta)$ with
+$\alpha \sim \text{Normal}(0, 2^2)$, $\beta \sim \text{Normal}(10, 10^2)$, and $\text{corr}(\alpha, \beta)=0.5$.
+```{r}
+mvn_prior <- function(alpha, beta) {
+  rho <- matrix(c(2^2, 2*10*0.5, 2*10*0.5, 10^2), ncol=2)
+  dmvnorm(c(alpha, beta), 
+           mean=c(0, 10),
+           sigma=rho)
+}
+
+prior.density <- function(grid, prior_fun){
+  grid %>%
+    rowwise %>%
+    mutate(prior = prior_fun(alpha, beta)) %>%
+    ungroup() %>%
+    mutate(prior = prior / sum(prior)) 
+}
+
+mvn.prior.grid <- prior.density(post.grid, prior_fun=mvn_prior)
 ```
 
 
+Our prior density then looks as follows:
+```{r, fig.height=5, fig.width=5}
+mode <- max(mvn.prior.grid$prior)
+breaks <- seq(0.05, 0.95, by=0.1) * mode
+
+mvn.prior.grid %>%
+  ggplot(aes(x=alpha, y=beta, z=prior)) + 
+  stat_contour(breaks=breaks, col="#E41A1C") +
+  ylim(-10, 40) +
+  scale_x_continuous(breaks=c(-4, -2, 0, 2, 4, 6, 8, 10), 
+                     limits = c(-5, 10)) +
+  theme_minimal() +
+  labs(title="Prior density")
+```
+
+We can visualize the samples again:
+```{r, warning=F, fig.height=5, fig.width=10}
+prior.sample <- extract.sample(mvn.prior.grid, prior=TRUE)
+
+prior_points <- prior.sample %>%
+  ggplot(aes(x=alpha, y=beta)) +
+  geom_point(size=0.5) +
+  ylim(-10, 40) +
+  scale_x_continuous(breaks=c(-4, -2, 0, 2, 4, 6, 8, 10), 
+                     limits = c(-5, 10)) +
+  theme_minimal() +
+  labs(title="Prior sample", subtitle="with multivariate normal prior")
+
+prior_model <- plot_samples(prior.sample, n=200, 
+                            title="Prior sample", subtitle="with multivariate normal prior")
+plot_grid(prior_points, prior_model)
+```
+
+We can see that the prior still allows a wide range of different models but different to the uniform prior, it is much more restricted to a certain range that is already very close to the observed data.
+
+<<<<<<< HEAD
 # Different priors
 <<<<<<< HEAD
 =======
 >>>>>>> code for bioassay example
 =======
 >>>>>>> bioassay example finished
+=======
+## The new posterior density
+We now use this prior to compute our posterior denstiy.
+```{r}
+mvn.post.grid <- posterior.grid(post.grid, prior_fun=mvn_prior)
+```
+We can compare our new posterior density with the old posterior density (obtained with a uniform prior)
+```{r, fig.height=5, fig.width=10}
+mode <- max(mvn.post.grid$post)
+breaks <- seq(0.05, 0.95, by=0.1) * mode
+
+mvn_post_plot <- mvn.post.grid %>%
+  ggplot(aes(x=alpha, y=beta, z=post)) + 
+  stat_contour(breaks=breaks, col="#377EB8") +
+  ylim(-10, 40) +
+  scale_x_continuous(breaks=c(-4, -2, 0, 2, 4, 6, 8, 10), 
+                     limits = c(-5, 10)) +
+  scale_color_brewer(palette = "Set1", name="",
+                     label=c("post"="posterior", "prior"), direction = -1) +
+  theme_minimal() +
+  labs(title="Posterior density", subtitle = "with multivariate normal prior")
+
+plot_grid(unf_post_plot, mvn_post_plot)
+```
+
+We can see that our new prior is slightly more regularizing than the uniform prior: The new posterior density is a bit tighter than the old posterior.
+
+We can also compare the maximum a posteriori estimates:
+With the uniform prior, we have as MAP estimate:
+```{r}
+post.grid[which.max(post.grid$post),]
+```
+and with the multivariate normal posterior, we get:
+```{r}
+mvn.post.grid[which.max(mvn.post.grid$post),]
+```
+
+While the beta value is the same (at least in our grid approximation), the new posterior alpha is a bit closer to zero. 
+
+# Sampling from the new posterior
+```{r, fig.height=5, fig.width=10, warning=F}
+mvn.post.sample <- extract.sample(mvn.post.grid)
+mvn.prior.sample <- extract.sample(mvn.prior.grid, prior = T)
+
+post_plot <- mvn.post.sample %>%
+  ggplot(aes(x=alpha, y=beta)) +
+  geom_point(size=0.5) +
+  ylim(-10, 40) +
+  scale_x_continuous(breaks=c(-4, -2, 0, 2, 4, 6, 8, 10), 
+                     limits = c(-5, 10)) +
+  theme_minimal() +
+  labs(title="Posterior sample", subtitle = "with multivariate normal prior")
+
+prior_plot <- mvn.prior.sample %>%
+  ggplot(aes(x=alpha, y=beta)) +
+  geom_point(size=0.5) +
+  ylim(-10, 40) +
+  scale_x_continuous(breaks=c(-4, -2, 0, 2, 4, 6, 8, 10), 
+                     limits = c(-5, 10)) +
+  theme_minimal() +
+  labs(title="Prior sample", subtitle = "with multivariate normal prior")
+
+plot_grid(post_plot, prior_plot)
+```
+
+We again use the sample to visualize the posterior for the logistic model:
+```{r}
+plot_samples(mvn.post.sample) 
+```
+
+We can compare this again to the prior samples which also shows how the posterior is a compromise between the data and the prior.
+```{r}
+plot_samples(mvn.prior.sample) +
+  labs(title="Prior samples")
+```
+
+## New LD50
+```{r, warning=F, fig.height=5, fig.width=10}
+mvn.LD50_samps <- mvn.post.sample %>%
+  mutate( LD50 = - alpha / beta) 
+
+mvn.LD50.mean <- mvn.LD50_samps %>%
+  summarise(mean = mean(LD50))
+
+mvn.LD50.plot <- mvn.LD50_samps %>%
+  ggplot(aes(x=LD50)) + 
+  geom_histogram(bins=50, 
+                 fill="#377EB8", col="white") +
+  scale_y_continuous(labels = NULL, name="") +
+  xlim(-0.6, 0.7) + 
+  geom_vline(data=mvn.LD50.mean, aes(xintercept=mean), col="#E41A1C") +
+  theme_minimal() +
+  labs(title="Posterior distribution for the LD50", 
+       subtitle="with multivariate normal prior")
+
+plot_grid(mvn.LD50.plot, unif.LD50.plot)
+```
+>>>>>>> Bioassay example and Exercise 11
