@@ -8,11 +8,15 @@ output: html_document
 ```{r setup, include=FALSE}
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 8009051bbf8560e11876eb94c2e8897c4b0f5cff
 knitr::opts_chunk$set(echo = TRUE, comment = NA)
 ```
 
 ```{r, warning=F, message=F}
 library(ggplot2)
+<<<<<<< HEAD
 library(mvtnorm)
 library(dplyr)
 library(cowplot)
@@ -60,6 +64,8 @@ knitr::opts_chunk$set(echo = TRUE, comment = NA)
 
 ```{r, warning=F, message=F}
 library(ggplot2)
+=======
+>>>>>>> 8009051bbf8560e11876eb94c2e8897c4b0f5cff
 library(dplyr)
 ```
 This example is a nonconjugate model for a bioassay experiment. It is a two-parameter example from the class of generalized linear models. Here, we use a simulation grid-approximation approach to get the posterior distribution.
@@ -75,8 +81,11 @@ d %>% knitr::kable()
 ```
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 >>>>>>> code for bioassay example
 =======
+=======
+>>>>>>> 8009051bbf8560e11876eb94c2e8897c4b0f5cff
 ## The model
 It is reasonable to model the outcomes of the five animals _within each group_ as exchangeable and independent. The data points $y_i$=`n_deaths` are then binomially distributed:
 $$y_i | \theta_i \sim \text{Bin}(n_i, \theta)$$
@@ -87,6 +96,7 @@ $$\text{logit}(\theta_i)  = \alpha + \beta x_i$$
 This is called a logistic regression model.
 
 We will estimate this model using a grid. To know where we need to span the grid, we first use a frequentist approach to get an estimate.
+<<<<<<< HEAD
 >>>>>>> bioassay example finished
 ## A frequentist approach
 To get a rough estimate around where we should plot our grid, we first compute the maximum likelihood estimate using the standard logistic regression tools.
@@ -96,6 +106,16 @@ d.notagg <- data.frame(log.dose=c(rep(-0.86, 5), rep(-0.3,5), rep(-0.05,5), rep(
 
 fit <- glm(death ~ 1 + log.dose,
           data=d.notagg,
+=======
+## A frequentist approach
+To get a rough estimate around where we should plot our grid, we first compute the maximum likelihood estimate using the standard logistic regression tools.
+```{r}
+d <- data.frame(log.dose=c(rep(-0.86, 5), rep(-0.3,5), rep(-0.05,5), rep(0.73,5) ),
+                death=c(rep(0,5), 1, rep(0,4), rep(1, 3), 0, 0, rep(1, 5)) )
+
+fit <- glm(death ~ 1 + log.dose,
+          data=d,
+>>>>>>> 8009051bbf8560e11876eb94c2e8897c4b0f5cff
           family="binomial")
 
 summary(fit)
@@ -104,6 +124,7 @@ summary(fit)
 The estimate is $(\hat{\alpha}, \hat{\beta}) = (0.85, 7.75)$ with standard errors of 1.0 and 4.9 for $\alpha$ and $\beta$, respectively.
 
 # Approximating the posterior using a grid
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 First, we define some functions.
@@ -130,17 +151,31 @@ Simplifying some of the expressions, we get the following function for the log l
 
 >>>>>>> code for bioassay example
 =======
+=======
+First, we define some functions.
+```{r}
+d <- data.frame(log.dose = c(-0.86, -0.3, -0.05, 0.73),
+                n.animals = c(5, 5, 5, 5),
+                n.deaths = c(0, 1, 3, 5))
+
+
+logit <- function(x) log(x / (1-x) )
+>>>>>>> 8009051bbf8560e11876eb94c2e8897c4b0f5cff
 ```
 
 We compute the log posterior using the log likelihood. This helps to avoid numerical problems.
 Simplifying some of the expressions, we get the following function for the log likelihood:
 ```{r}
+<<<<<<< HEAD
 >>>>>>> bioassay example finished
+=======
+>>>>>>> 8009051bbf8560e11876eb94c2e8897c4b0f5cff
 log.lkhd <- function(alpha, beta) {
   lin <- alpha + beta * d$log.dose
   y <- d$n.deaths; n <- d$n.animals
   sum( y*(lin - log( 1 + exp(lin ) )) + ( n-y )*(-log(1 + exp(lin))) )
 }
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 ```
@@ -160,6 +195,8 @@ prior <- function(alpha, beta) {
 
 >>>>>>> code for bioassay example
 =======
+=======
+>>>>>>> 8009051bbf8560e11876eb94c2e8897c4b0f5cff
 ```
 Next, we define a prior function. Since we use a uniform prior, we just define a constant function:
 ```{r}
@@ -167,11 +204,16 @@ prior <- function(alpha, beta) {
   1
 }
 ```
+<<<<<<< HEAD
 
 
 Next, we define our grid and a function to compute the posterior:
 ```{r}
 >>>>>>> bioassay example finished
+=======
+Next, we define our grid and a function to compute the posterior:
+```{r}
+>>>>>>> 8009051bbf8560e11876eb94c2e8897c4b0f5cff
 grid_size <- 100
 alpha_seq <- seq(-5, 10, length.out=grid_size)
 beta_seq <- seq(-10, 40, length.out=grid_size)
@@ -182,12 +224,16 @@ beta_width <- beta_seq[2] - beta_seq[1]
 post.grid <- expand.grid(alpha = alpha_seq, 
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 >>>>>>> bioassay example finished
+=======
+>>>>>>> 8009051bbf8560e11876eb94c2e8897c4b0f5cff
                          beta = beta_seq ) 
 
 posterior.grid <- function(grid, prior_fun=prior) {
   grid %>%
+<<<<<<< HEAD
 <<<<<<< HEAD
 =======
                          beta = beta_seq ) %>%
@@ -197,10 +243,16 @@ posterior.grid <- function(grid, prior_fun=prior) {
   rowwise %>%
   mutate(loglkhd = log.lkhd(alpha, beta),
          prior = prior_fun(alpha, beta)) %>%
+=======
+  rowwise %>%
+  mutate(loglkhd = log.lkhd(alpha, beta),
+         prior = prior(alpha, beta)) %>%
+>>>>>>> 8009051bbf8560e11876eb94c2e8897c4b0f5cff
   mutate(log.post = loglkhd + log(prior) ) %>%
   ungroup() %>%
   mutate(log.postm = log.post - max(log.post),
          un.post = exp(log.postm),
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 =======
@@ -208,6 +260,10 @@ posterior.grid <- function(grid, prior_fun=prior) {
          # normalize the posterior
          post = un.post / sum(un.post),
          prior = prior / sum(prior) ) %>%
+=======
+         # normalize the posterior
+         post = un.post / sum(un.post)) %>%
+>>>>>>> 8009051bbf8560e11876eb94c2e8897c4b0f5cff
     select(-log.postm, -un.post)
 }
 ```
@@ -217,6 +273,7 @@ post.grid <- posterior.grid(post.grid)
 ```
 We can plot the posterior density as contour lines. To get the right contour lines, we use the mode and multiply it with 0.05, 0.1, 0.15, ..., 0.95.
 ```{r, fig.height=5, fig.width=5}
+<<<<<<< HEAD
 <<<<<<< HEAD
 mode <- max(post.grid$post)
 breaks <- seq(0.05, 0.95, by=0.1) * mode
@@ -241,10 +298,19 @@ unf_post_plot <- post.grid %>%
 >>>>>>> Bioassay example and Exercise 11
   ggplot(aes(x=alpha, y=beta, z=post)) + 
   stat_contour(breaks=breaks, col="#377EB8") +
+=======
+mode <- max(post.grid$post)
+breaks <- seq(0.05, 0.95, by=0.1) * mode
+
+post.grid %>%
+  ggplot(aes(x=alpha, y=beta, z=post)) + 
+  stat_contour(breaks=breaks) +
+>>>>>>> 8009051bbf8560e11876eb94c2e8897c4b0f5cff
   ylim(-10, 40) +
   scale_x_continuous(breaks=c(-4, -2, 0, 2, 4, 6, 8, 10), 
                      limits = c(-5, 10)) +
   theme_minimal() +
+<<<<<<< HEAD
   labs(title="Posterior density", subtitle = "with uniform prior")
 unf_post_plot
 ```
@@ -260,6 +326,14 @@ To sample from the posterior, we take the following steps:
 To sample from the posterior, we take the following steps:
 1. Compute the marginal posterior distribution of $\alpha$ by numerically summing over $\beta$:
 >>>>>>> bioassay example finished
+=======
+  labs(title="Posterior density")
+```
+
+# Sampling from the posterior
+To sample from the posterior, we take the following steps:
+1. Compute the marginal posterior distribution of $\alpha$ by numerically summing over $\beta$:
+>>>>>>> 8009051bbf8560e11876eb94c2e8897c4b0f5cff
 ```{r}
 marg.alpha <- post.grid %>%
   group_by(alpha) %>%
@@ -267,6 +341,7 @@ marg.alpha <- post.grid %>%
   pull(post)
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 ```
 
 2. For $s = 1, ..., 1000$ (or more if you want to have more samples), 
@@ -282,6 +357,9 @@ alpha.sample <- sample(seq(-5, 10, length.out = 100), N, replace=T, prob=marg.al
 =======
 ```
 >>>>>>> bioassay example finished
+=======
+```
+>>>>>>> 8009051bbf8560e11876eb94c2e8897c4b0f5cff
 
 2. For $s = 1, ..., 1000$ (or more if you want to have more samples), 
   a) Draw samples from $p(\alpha | y)$:
@@ -289,14 +367,20 @@ alpha.sample <- sample(seq(-5, 10, length.out = 100), N, replace=T, prob=marg.al
 N <- 1000
 alpha.sample <- sample(seq(-5, 10, length.out = 100), N, replace=T, prob=marg.alpha)
 <<<<<<< HEAD
+<<<<<<< HEAD
 
 >>>>>>> code for bioassay example
 =======
+=======
+>>>>>>> 8009051bbf8560e11876eb94c2e8897c4b0f5cff
 ```
   
   b) Draw $\beta$ from the discrete conditional distribution $p(\beta | \alpha, y)$ given the just-sampled value of $\alpha$:
 ```{r}
+<<<<<<< HEAD
 >>>>>>> bioassay example finished
+=======
+>>>>>>> 8009051bbf8560e11876eb94c2e8897c4b0f5cff
 beta.sample <- c()
 for(i in 1:N) {
   cond.beta <- post.grid %>%
@@ -308,12 +392,16 @@ for(i in 1:N) {
 }
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 >>>>>>> bioassay example finished
+=======
+>>>>>>> 8009051bbf8560e11876eb94c2e8897c4b0f5cff
 ```
   
   c) For each of the sampled $\alpha$ and $\beta$, add a uniform random jitter, centered at zero with a width equal to the spacing of the sampling grid, This gives the simulation draws a continuous distribution:
 ```{r}
+<<<<<<< HEAD
 <<<<<<< HEAD
 =======
 
@@ -321,12 +409,15 @@ for(i in 1:N) {
 >>>>>>> code for bioassay example
 =======
 >>>>>>> bioassay example finished
+=======
+>>>>>>> 8009051bbf8560e11876eb94c2e8897c4b0f5cff
 alpha.sample <- alpha.sample + runif(N, min = 0 - alpha_width/2,
                                         max = 0 + alpha_width/2)
 beta.sample <- beta.sample + runif(N, min = 0 - beta_width/2, 
                                       max = 0 + beta_width/2 )
 ```
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 =======
@@ -342,6 +433,12 @@ extract.sample <- function(density.grid, N=1000, prior=FALSE) {
       select(alpha,  beta, post)
   }
   marg.alpha <- density.grid %>%
+=======
+The whole thing as a function:
+```{r}
+extract.sample <- function(post.grid, N=1000) {
+  marg.alpha <- post.grid %>%
+>>>>>>> 8009051bbf8560e11876eb94c2e8897c4b0f5cff
   group_by(alpha) %>%
   summarise(post = sum(post)) %>%
   pull(post)
@@ -349,7 +446,11 @@ extract.sample <- function(density.grid, N=1000, prior=FALSE) {
   alpha.sample <- sample(seq(-5, 10, length.out = 100), N, replace=T, prob=marg.alpha)
   beta.sample <- c()
   for(i in 1:N) {
+<<<<<<< HEAD
     cond.beta <- density.grid %>%
+=======
+    cond.beta <- post.grid %>%
+>>>>>>> 8009051bbf8560e11876eb94c2e8897c4b0f5cff
       filter(alpha == alpha.sample[i]) %>%
       mutate(post = post / sum(post)) %>%
       pull(post)
@@ -368,10 +469,14 @@ extract.sample <- function(density.grid, N=1000, prior=FALSE) {
 
 We can now plot the posterior sample:
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 8009051bbf8560e11876eb94c2e8897c4b0f5cff
 ```{r, fig.height=5, fig.width=5}
 post.sample <- extract.sample(post.grid)
 
 post.sample %>%
+<<<<<<< HEAD
 =======
 ```{r, fig.height=5, fig.width=5}
 data.frame(alpha = alpha.sample,
@@ -383,6 +488,8 @@ post.sample <- extract.sample(post.grid)
 
 post.sample %>%
 >>>>>>> bioassay example finished
+=======
+>>>>>>> 8009051bbf8560e11876eb94c2e8897c4b0f5cff
   ggplot(aes(x=alpha, y=beta)) +
   geom_point(size=0.5) +
   ylim(-10, 40) +
@@ -392,6 +499,7 @@ post.sample %>%
   labs(title="Posterior sample")
 ```
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
@@ -441,6 +549,8 @@ plot_samples(prior.sample, n=200, title="Prior samples")
 
 
 >>>>>>> Bioassay example and Exercise 11
+=======
+>>>>>>> 8009051bbf8560e11876eb94c2e8897c4b0f5cff
 ## Posterior Distribution of the LD50
 We can use the posterior sample to compute the LD50 - the dose level at which probability of death is 50%.
 In our logistic model, a 50% survival rate means
@@ -461,6 +571,7 @@ mean(post.sample$beta > 0)
 From this, we can conclude that the posterior probability of $\beta > 0$ is roughly estimated to exceed 0.999.
 
 (2) The posterior distribution for the LD50 conditional on $\beta > 0$. All draws had positive values of $\beta$, so the distribution is given by the whole sample:
+<<<<<<< HEAD
 ```{r, warning=F}
 LD50_samps <- post.sample %>%
   mutate( LD50 = - alpha / beta) 
@@ -468,10 +579,16 @@ LD50.mean <- LD50_samps %>%
   summarise(mean = mean(LD50))
 
 unif.LD50.plot <- LD50_samps %>%
+=======
+```{r}
+post.sample %>%
+  mutate( LD50 = - alpha / beta) %>%
+>>>>>>> 8009051bbf8560e11876eb94c2e8897c4b0f5cff
   ggplot(aes(x=LD50)) + 
   geom_histogram(bins=50, 
                  fill="#377EB8", col="white") +
   scale_y_continuous(labels = NULL, name="") +
+<<<<<<< HEAD
   xlim(-0.6, 0.7) +
   geom_vline(data=LD50.mean, aes(xintercept=mean), col="#E41A1C") +
   theme_minimal() +
@@ -650,3 +767,10 @@ mvn.LD50.plot <- mvn.LD50_samps %>%
 plot_grid(mvn.LD50.plot, unif.LD50.plot)
 ```
 >>>>>>> Bioassay example and Exercise 11
+=======
+  theme_minimal()
+```
+
+
+# Different priors
+>>>>>>> 8009051bbf8560e11876eb94c2e8897c4b0f5cff

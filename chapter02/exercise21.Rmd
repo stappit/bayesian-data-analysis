@@ -6,6 +6,7 @@ output: html_document
 ```{r setup, include=FALSE}
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 knitr::opts_chunk$set(echo = TRUE, comment = NA, warning = F)
 =======
 knitr::opts_chunk$set(echo = TRUE, comment = NA)
@@ -13,10 +14,14 @@ knitr::opts_chunk$set(echo = TRUE, comment = NA)
 =======
 knitr::opts_chunk$set(echo = TRUE, comment = NA, warning = F)
 >>>>>>> render exercise 21
+=======
+knitr::opts_chunk$set(echo = TRUE, comment = NA, warning = F)
+>>>>>>> 8009051bbf8560e11876eb94c2e8897c4b0f5cff
 ```
 
 
 ## Combining the data
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 The data is available from Gelmans [website](http://stat.columbia.edu/~gelman/book/data/). The data combines multiple surveys and asks various questions. There is thus a whole range of columns in the data frame.
@@ -26,6 +31,9 @@ The data is available from Gelmans [website](). The data combines multiple surve
 =======
 The data is available from Gelmans [website](http://stat.columbia.edu/~gelman/book/data/). The data combines multiple surveys and asks various questions. There is thus a whole range of columns in the data frame.
 >>>>>>> render exercise 21
+=======
+The data is available from Gelmans [website](http://stat.columbia.edu/~gelman/book/data/). The data combines multiple surveys and asks various questions. There is thus a whole range of columns in the data frame.
+>>>>>>> 8009051bbf8560e11876eb94c2e8897c4b0f5cff
 ```{r, message=F, warning=F}
 library(foreign)
 library(tidyverse)
@@ -99,6 +107,7 @@ We can use the Method of Moments to obtain estimates for our prior:
 ```{r}
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 ( rate <- mean( d$lib / d$n ) / var( d$lib / d$n ) )
 ( shape <- rate*mean( d$lib / d$n ) )
 =======
@@ -109,6 +118,10 @@ shape <- rate*mean( d$lib / d$n )
 ( rate <- mean( d$lib / d$n ) / var( d$lib / d$n ) )
 ( shape <- rate*mean( d$lib / d$n ) )
 >>>>>>> render exercise 21
+=======
+( rate <- mean( d$lib / d$n ) / var( d$lib / d$n ) )
+( shape <- rate*mean( d$lib / d$n ) )
+>>>>>>> 8009051bbf8560e11876eb94c2e8897c4b0f5cff
 ```
 
 This gives a prior that puts most probability mass between 0 and 0.1 for the rate parameter $\theta$.

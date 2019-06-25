@@ -382,6 +382,7 @@ $(document).ready(function () {
 <h2>Combining the data</h2>
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 <p>The data is available from Gelmans <a href="http://stat.columbia.edu/~gelman/book/data/">website</a>. The data combines multiple surveys and asks various questions. There is thus a whole range of columns in the data frame.</p>
 =======
 <p>The data is available from Gelmans <a href>website</a>. The data combines multiple surveys and asks various questions. There is thus a whole range of columns in the data frame.</p>
@@ -389,6 +390,9 @@ $(document).ready(function () {
 =======
 <p>The data is available from Gelmans <a href="http://stat.columbia.edu/~gelman/book/data/">website</a>. The data combines multiple surveys and asks various questions. There is thus a whole range of columns in the data frame.</p>
 >>>>>>> render exercise 21
+=======
+<p>The data is available from Gelmans <a href="http://stat.columbia.edu/~gelman/book/data/">website</a>. The data combines multiple surveys and asks various questions. There is thus a whole range of columns in the data frame.</p>
+>>>>>>> 8009051bbf8560e11876eb94c2e8897c4b0f5cff
 <pre class="r"><code>library(foreign)
 library(tidyverse)
 library(scales)
@@ -440,6 +444,7 @@ election &lt;- election %&gt;%
          obama_vote_share = vote_Obama_pct / 100,
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
          obama_won = vote_Obama_pct &gt; 50)
 
 d  </code></pre>
@@ -454,6 +459,11 @@ character vector</code></pre>
 
 d  </code></pre>
 >>>>>>> render exercise 21
+=======
+         obama_won = vote_Obama_pct &gt; 50)
+
+d  </code></pre>
+>>>>>>> 8009051bbf8560e11876eb94c2e8897c4b0f5cff
 <pre><code># A tibble: 50 x 13
    state   lib     n abb   vote_Obama vote_Obama_pct vote_McCain
    &lt;chr&gt; &lt;int&gt; &lt;int&gt; &lt;chr&gt;      &lt;int&gt;          &lt;dbl&gt;       &lt;int&gt;
@@ -494,12 +504,16 @@ d  </code></pre>
 <p>The conjugate prior for the Poisson distribution is the Gamma distribution <span class="math inline">\(\text{Gamma}(\alpha, \beta)\)</span> with shape parameter <span class="math inline">\(\alpha\)</span> and rate parameter <span class="math inline">\(\beta\)</span>. We can use the Method of Moments to obtain estimates for our prior:</p>
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 >>>>>>> render exercise 21
+=======
+>>>>>>> 8009051bbf8560e11876eb94c2e8897c4b0f5cff
 <pre class="r"><code>( rate &lt;- mean( d$lib / d$n ) / var( d$lib / d$n ) )</code></pre>
 <pre><code>[1] 103.8434</code></pre>
 <pre class="r"><code>( shape &lt;- rate*mean( d$lib / d$n ) )</code></pre>
 <pre><code>[1] 4.865153</code></pre>
+<<<<<<< HEAD
 <<<<<<< HEAD
 =======
 <pre class="r"><code>rate &lt;- mean( d$lib / d$n ) / var( d$lib / d$n )
@@ -507,6 +521,8 @@ shape &lt;- rate*mean( d$lib / d$n )</code></pre>
 >>>>>>> add exercise 21 plus required data
 =======
 >>>>>>> render exercise 21
+=======
+>>>>>>> 8009051bbf8560e11876eb94c2e8897c4b0f5cff
 <p>This gives a prior that puts most probability mass between 0 and 0.1 for the rate parameter <span class="math inline">\(\theta\)</span>.</p>
 <pre class="r"><code>curve(dgamma(x, shape=shape, rate=rate), from=0, to=0.3)
 hist(d$lib / d$n , add=T)</code></pre>
