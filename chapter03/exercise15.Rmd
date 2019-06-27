@@ -1,0 +1,83 @@
+---
+title: "Chapter 3 - Exercise 15"
+author: "Aaron McDaid - aaron.mcdaid@gmail.com"
+date: "2 May 2019"
+output: html_document
+---
+
+<div style="display:none">
+  $$
+  \newcommand{\PP}[1]{\mathrm{P}\mathopen{}\left( #1 \right)\mathclose{}}
+  \newcommand{\EE}[1]{\mathbb{E}\mathopen{}\left[ #1 \right]\mathclose{}}
+  \newcommand{\Var}[1]{\mathrm{Var}\mathopen{}\left[ #1 \right]\mathclose{}}
+  \newcommand{\dd}[0]{~\mathrm{d}}
+  $$
+</div>
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  # cache = TRUE,
+  # dev = "svglite",
+  echo = TRUE,
+  comment = NA,
+  message = FALSE,
+  warning = TRUE,
+  error = TRUE
+)
+
+library(tidyverse)
+library(scales)
+library(kableExtra)
+library(here)
+
+theme_set(theme_bw())
+```
+
+Question 15: Joint distributions: The autoregressive time-series model $y_1$, $y_2$, $\dots$ with mean level $0$,
+autocorrelation $0.8$, residual standard deviation $1$, and normal errors can be written as
+$$(y_t |y_{t−1} , y_{t−2} , \dots) \sim N(0.8y_{t−1} , 1) \qquad \mbox{ for all $t$}$$.
+
+(a) Prove that the distribution of $y_t$ , given the observations at all other integer time points
+$t$, depends only on $y_{t−1}$ and $y_{t+1}$ .
+
+(b) What is the distribution of $y_t$ given $y_{t-1}$ and $y_{t+1}$ ?
+
+Controversial (?) first step: The right hand side of the equation above has no $y_*$ other than $y_{t-1}$,
+hence we can simplify it to:
+$$(y_t |y_{t−1} , y_{t−2} , \dots) = (y_t |y_{t−1}) \sim N(0.8y_{t−1} , 1) \qquad \mbox{ for all $t$}$$.
+
+$$
+\begin{align}
+	\PP{y_t | y_{t+1}, y_{t−1} , y_{t−2} , \dots}
+	& =\frac{
+	\PP{y_{t+1}, y_t , y_{t−1} , y_{t−2} , \dots}
+	}{
+	\PP{      y_{t+1}, y_{t−1} , y_{t−2} , \dots}
+	}
+\\      & =\frac{
+	\PP{y_{t+1}, y_t , y_{t−1} , y_{t−2} , \dots}
+	}{ \int
+	\PP{      y_{t+1}, y_t, y_{t−1} , y_{t−2} , \dots}
+	\dd y_t
+	}
+\\      & =\frac{
+	\PP{y_{t+1}|y_t}\PP{y_t|y_{t−1}}\PP{y_{t-1}|y_{t−2}}\PP{y_{t-2}|y_{t−3}}\dots
+	}{ \int
+	\PP{y_{t+1}|y_t}\PP{y_t|y_{t−1}}\PP{y_{t-1}|y_{t−2}}\PP{y_{t-2}|y_{t−3}}\dots
+	\dd y_t
+	}
+\\      & =\frac{
+	\PP{y_{t+1}|y_t}\PP{y_t|y_{t−1}}
+	}{ \int
+	\PP{y_{t+1}|y_t}\PP{y_t|y_{t−1}}
+	\dd y_t
+	}
+\end{align}
+$$
+
+That final expression includes terms for $y_{t+1}$, $y_t$ and $y_{t-1}$, but nothing else.
+Therefore part (a) is shown.
+
+For part b, I think we can model $(y_{t+1}, y_t)$ as a bivariate normal,
+parameterized in terms of $y_{t-1}$, and use  equation 3.14).
+TODO: part b!
