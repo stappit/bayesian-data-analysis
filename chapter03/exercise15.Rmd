@@ -7,6 +7,7 @@ output: html_document
 
 <div style="display:none">
   $$
+  \newcommand{\NN}[1]{\mathcal{N}\mathopen{}\left( #1 \right)\mathclose{}}
   \newcommand{\PP}[1]{\mathrm{P}\mathopen{}\left( #1 \right)\mathclose{}}
   \newcommand{\EE}[1]{\mathbb{E}\mathopen{}\left[ #1 \right]\mathclose{}}
   \newcommand{\Var}[1]{\mathrm{Var}\mathopen{}\left[ #1 \right]\mathclose{}}
