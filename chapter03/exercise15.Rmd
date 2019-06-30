@@ -7,10 +7,12 @@ output: html_document
 
 <div style="display:none">
   $$
+  \newcommand{\NN}[1]{\mathcal{N}\mathopen{}\left( #1 \right)\mathclose{}}
   \newcommand{\PP}[1]{\mathrm{P}\mathopen{}\left( #1 \right)\mathclose{}}
   \newcommand{\EE}[1]{\mathbb{E}\mathopen{}\left[ #1 \right]\mathclose{}}
   \newcommand{\Var}[1]{\mathrm{Var}\mathopen{}\left[ #1 \right]\mathclose{}}
   \newcommand{\dd}[0]{~\mathrm{d}}
+  \newcommand{\yy}[0]{\boldsymbol{y}}
   $$
 </div>
 
@@ -33,6 +35,8 @@ library(here)
 theme_set(theme_bw())
 ```
 
+
+### The question
 Question 15: Joint distributions: The autoregressive time-series model $y_1$, $y_2$, $\dots$ with mean level $0$,
 autocorrelation $0.8$, residual standard deviation $1$, and normal errors can be written as
 $$(y_t |y_{t−1} , y_{t−2} , \dots) \sim N(0.8y_{t−1} , 1) \qquad \mbox{ for all $t$}$$.
@@ -42,41 +46,71 @@ $t$, depends only on $y_{t−1}$ and $y_{t+1}$ .
 
 (b) What is the distribution of $y_t$ given $y_{t-1}$ and $y_{t+1}$ ?
 
-Controversial (?) first step: The right hand side of the equation above has no $y_*$ other than $y_{t-1}$,
-hence we can simplify it to:
-$$(y_t |y_{t−1} , y_{t−2} , \dots) = (y_t |y_{t−1}) \sim N(0.8y_{t−1} , 1) \qquad \mbox{ for all $t$}$$.
+_This answer is just for part (a) of question 15. Also, it's very much a work-in-progress as we try to make it clear and correct_
+
+### some notation
+
+First define some notation to make things more concise.
+Define $\yy_{a..b}$ as a vector of all $y_i$ with $a \ge i \gt b$.
+This allows us to say:
+
+$$ \PP{\yy_{1..t}} = \PP{y_t, y_{t-1}, \dots, y_2, y_1} $$
+
+### conditional probability
 
 $$
-\begin{align}
-	\PP{y_t | y_{t+1}, y_{t−1} , y_{t−2} , \dots}
-	& =\frac{
-	\PP{y_{t+1}, y_t , y_{t−1} , y_{t−2} , \dots}
-	}{
-	\PP{      y_{t+1}, y_{t−1} , y_{t−2} , \dots}
-	}
-\\      & =\frac{
-	\PP{y_{t+1}, y_t , y_{t−1} , y_{t−2} , \dots}
-	}{ \int
-	\PP{      y_{t+1}, y_t, y_{t−1} , y_{t−2} , \dots}
-	\dd y_t
-	}
-\\      & =\frac{
-	\PP{y_{t+1}|y_t}\PP{y_t|y_{t−1}}\PP{y_{t-1}|y_{t−2}}\PP{y_{t-2}|y_{t−3}}\dots
-	}{ \int
-	\PP{y_{t+1}|y_t}\PP{y_t|y_{t−1}}\PP{y_{t-1}|y_{t−2}}\PP{y_{t-2}|y_{t−3}}\dots
-	\dd y_t
-	}
-\\      & =\frac{
-	\PP{y_{t+1}|y_t}\PP{y_t|y_{t−1}}
-	}{ \int
-	\PP{y_{t+1}|y_t}\PP{y_t|y_{t−1}}
-	\dd y_t
-	}
-\end{align}
+\PP{A | B, C} = \frac{\PP{A, B, C}}{\PP{B,C}}
+$$
+Next, note that
+$$\PP{B, C} = \int \PP{A,B,C} \dd A
+$$
+and therefore
+$$
+\PP{A | B, C} = \frac{\PP{A, B, C}}{\int \PP{A,B,C} \dd A}
+$$
+
+### part(a)
+
+The question discusses "all other integer time points".
+We define $n$ as an arbitrarily large integer much greater than $t+1$.
+We can't easily reason about "all" time points, as there are infinitely many;
+but we can consider large $n$ as $n \rightarrow \infty$.
+
+We begin with the joint density over "all" time points:
+$$
+	\PP{\yy_{1..n}} = \PP{y_n, y_{n−1} , y_{n−2}, \dots, y_{t+1}, y_t, y_{t-1} , \dots, y_1}
+$$
+
+Using the formula above for conditional probability:
+$$
+	\PP{y_t | \yy_{1..t-1}, \yy_{t+1..n}} = \frac{\PP{\yy_{1..n}}}{\int \dd y_t ~ \PP{\yy_{1..n}}}
+$$
+
+We can use the gaussian density in the question to expand:
+$$
+\PP{\yy_{1..n}} = \PP{y_1} \prod_{i=2}^n \NN{y_i|0.8 y_{i-1}, 1}
+$$
+Substituting this into
+$$
+	\PP{y_t | \yy_{1..t-1}, \yy_{t+1..n}} = \frac{\PP{\yy_{1..n}}}{\int \dd y_t ~ \PP{\yy_{1..n}}}
+$$
+we get
+$$
+	\PP{y_t | \yy_{1..t-1}, \yy_{t+1..n}} = \frac{\PP{y_1} \prod_{i=2}^n \NN{y_i|0.8 y_{i-1}, 1}}{\int \dd y_t ~ \PP{y_1} \prod_{i=2}^n \NN{y_i|0.8 y_{i-1}, 1}}
+$$
+Factors that don't use $y_t$ can be brought outside the integral:
+$$
+	\PP{y_t | \yy_{1..t-1}, \yy_{t+1..n}} = \frac{\PP{y_1} \prod_{i=2}^n \NN{y_i|0.8 y_{i-1}, 1}}{\PP{y_1} ~ \left( \prod_{i=2}^{t-1} \NN{y_i|0.8 y_{i-1}, 1}\right) \left(\prod_{i=t+1}^n \NN{y_i|0.8 y_{i-1}, 1}\right) \left(\int \dd y_t ~ \NN{y_t|0.8 y_{t-1}, 1} \NN{y_{t+1}|0.8 y_t, 1}\right)}
+$$
+The factors that were just moved out can be cancelled against the same factors in the numerator:
+$$
+	\PP{y_t | \yy_{1..t-1}, \yy_{t+1..n}} = \frac{\NN{y_t|0.8 y_{t-1}, 1} \NN{y_{t+1}|0.8 y_t, 1}}{\int \dd y_t ~ \NN{y_t|0.8 y_{t-1}, 1} \NN{y_{t+1}|0.8 y_t, 1}}
 $$
 
 That final expression includes terms for $y_{t+1}$, $y_t$ and $y_{t-1}$, but nothing else.
 Therefore part (a) is shown.
+
+### part (b)
 
 For part b, I think we can model $(y_{t+1}, y_t)$ as a bivariate normal,
 parameterized in terms of $y_{t-1}$, and use  equation 3.14).
