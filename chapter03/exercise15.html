@@ -193,6 +193,7 @@ $(document).ready(function () {
 
 <div style="display:none">
 <p><span class="math display">\[
+  \newcommand{\NN}[1]{\mathcal{N}\mathopen{}\left( #1 \right)\mathclose{}}
   \newcommand{\PP}[1]{\mathrm{P}\mathopen{}\left( #1 \right)\mathclose{}}
   \newcommand{\EE}[1]{\mathbb{E}\mathopen{}\left[ #1 \right]\mathclose{}}
   \newcommand{\Var}[1]{\mathrm{Var}\mathopen{}\left[ #1 \right]\mathclose{}}
@@ -200,16 +201,28 @@ $(document).ready(function () {
   \newcommand{\yy}[0]{\boldsymbol{y}}
   \]</span></p>
 </div>
-<p><em>This answer is just for part (a) of question 15. Also, it’s very much a work-in-progress as we try to make it clear and correct</em></p>
+<div id="the-question" class="section level3">
+<h3>The question</h3>
 <p>Question 15: Joint distributions: The autoregressive time-series model <span class="math inline">\(y_1\)</span>, <span class="math inline">\(y_2\)</span>, <span class="math inline">\(\dots\)</span> with mean level <span class="math inline">\(0\)</span>, autocorrelation <span class="math inline">\(0.8\)</span>, residual standard deviation <span class="math inline">\(1\)</span>, and normal errors can be written as <span class="math display">\[(y_t |y_{t−1} , y_{t−2} , \dots) \sim N(0.8y_{t−1} , 1) \qquad \mbox{ for all $t$}\]</span>.</p>
 <ol style="list-style-type: lower-alpha">
 <li><p>Prove that the distribution of <span class="math inline">\(y_t\)</span> , given the observations at all other integer time points <span class="math inline">\(t\)</span>, depends only on <span class="math inline">\(y_{t−1}\)</span> and <span class="math inline">\(y_{t+1}\)</span> .</p></li>
 <li><p>What is the distribution of <span class="math inline">\(y_t\)</span> given <span class="math inline">\(y_{t-1}\)</span> and <span class="math inline">\(y_{t+1}\)</span> ?</p></li>
 </ol>
+<p><em>This answer is just for part (a) of question 15. Also, it’s very much a work-in-progress as we try to make it clear and correct</em></p>
+</div>
 <div id="some-notation" class="section level3">
 <h3>some notation</h3>
 <p>First define some notation to make things more concise. Define <span class="math inline">\(\yy_{a..b}\)</span> as a vector of all <span class="math inline">\(y_i\)</span> with <span class="math inline">\(a \ge i \gt b\)</span>. This allows us to say:</p>
 <p><span class="math display">\[ \PP{\yy_{1..t}} = \PP{y_t, y_{t-1}, \dots, y_2, y_1} \]</span></p>
+</div>
+<div id="conditional-probability" class="section level3">
+<h3>conditional probability</h3>
+<p><span class="math display">\[
+\PP{A | B, C} = \frac{\PP{A, B, C}}{\PP{B,C}}
+\]</span> Next, note that <span class="math display">\[\PP{B, C} = \int \PP{A,B,C} \dd A
+\]</span> and therefore <span class="math display">\[
+\PP{A | B, C} = \frac{\PP{A, B, C}}{\int \PP{A,B,C} \dd A}
+\]</span></p>
 </div>
 <div id="parta" class="section level3">
 <h3>part(a)</h3>
@@ -217,34 +230,19 @@ $(document).ready(function () {
 <p>We begin with the joint density over “all” time points: <span class="math display">\[
     \PP{\yy_{1..n}} = \PP{y_n, y_{n−1} , y_{n−2}, \dots, y_{t+1}, y_t, y_{t-1} , \dots, y_1}
 \]</span></p>
-<p>Controversial (?) first step: The right hand side of the equation above has no <span class="math inline">\(y_*\)</span> other than <span class="math inline">\(y_{t-1}\)</span>, hence we can simplify it to: <span class="math display">\[(y_t |y_{t−1} , y_{t−2} , \dots) = (y_t |y_{t−1}) \sim N(0.8y_{t−1} , 1) \qquad \mbox{ for all $t$}\]</span>.</p>
-<p><span class="math display">\[
-\begin{align}
-    \PP{y_t | y_{t+1}, y_{t−1} , y_{t−2} , \dots}
-    &amp; =\frac{
-    \PP{y_{t+1}, y_t , y_{t−1} , y_{t−2} , \dots}
-    }{
-    \PP{      y_{t+1}, y_{t−1} , y_{t−2} , \dots}
-    }
-\\      &amp; =\frac{
-    \PP{y_{t+1}, y_t , y_{t−1} , y_{t−2} , \dots}
-    }{ \int
-    \PP{      y_{t+1}, y_t, y_{t−1} , y_{t−2} , \dots}
-    \dd y_t
-    }
-\\      &amp; =\frac{
-    \PP{y_{t+1}|y_t}\PP{y_t|y_{t−1}}\PP{y_{t-1}|y_{t−2}}\PP{y_{t-2}|y_{t−3}}\dots
-    }{ \int
-    \PP{y_{t+1}|y_t}\PP{y_t|y_{t−1}}\PP{y_{t-1}|y_{t−2}}\PP{y_{t-2}|y_{t−3}}\dots
-    \dd y_t
-    }
-\\      &amp; =\frac{
-    \PP{y_{t+1}|y_t}\PP{y_t|y_{t−1}}
-    }{ \int
-    \PP{y_{t+1}|y_t}\PP{y_t|y_{t−1}}
-    \dd y_t
-    }
-\end{align}
+<p>Using the formula above for conditional probability: <span class="math display">\[
+    \PP{y_t | \yy_{1..t-1}, \yy_{t+1..n}} = \frac{\PP{\yy_{1..n}}}{\int \dd y_t ~ \PP{\yy_{1..n}}}
+\]</span></p>
+<p>We can use the gaussian density in the question to expand: <span class="math display">\[
+\PP{\yy_{1..n}} = \PP{y_1} \prod_{i=2}^n \NN{y_i|0.8 y_{i-1}, 1}
+\]</span> Substituting this into <span class="math display">\[
+    \PP{y_t | \yy_{1..t-1}, \yy_{t+1..n}} = \frac{\PP{\yy_{1..n}}}{\int \dd y_t ~ \PP{\yy_{1..n}}}
+\]</span> we get <span class="math display">\[
+    \PP{y_t | \yy_{1..t-1}, \yy_{t+1..n}} = \frac{\PP{y_1} \prod_{i=2}^n \NN{y_i|0.8 y_{i-1}, 1}}{\int \dd y_t ~ \PP{y_1} \prod_{i=2}^n \NN{y_i|0.8 y_{i-1}, 1}}
+\]</span> Factors that don’t use <span class="math inline">\(y_t\)</span> can be brought outside the integral: <span class="math display">\[
+    \PP{y_t | \yy_{1..t-1}, \yy_{t+1..n}} = \frac{\PP{y_1} \prod_{i=2}^n \NN{y_i|0.8 y_{i-1}, 1}}{\PP{y_1} ~ \left( \prod_{i=2}^{t-1} \NN{y_i|0.8 y_{i-1}, 1}\right) \left(\prod_{i=t+1}^n \NN{y_i|0.8 y_{i-1}, 1}\right) \left(\int \dd y_t ~ \NN{y_t|0.8 y_{t-1}, 1} \NN{y_{t+1}|0.8 y_t, 1}\right)}
+\]</span> The factors that were just moved out can be cancelled against the same factors in the numerator: <span class="math display">\[
+    \PP{y_t | \yy_{1..t-1}, \yy_{t+1..n}} = \frac{\NN{y_t|0.8 y_{t-1}, 1} \NN{y_{t+1}|0.8 y_t, 1}}{\int \dd y_t ~ \NN{y_t|0.8 y_{t-1}, 1} \NN{y_{t+1}|0.8 y_t, 1}}
 \]</span></p>
 <p>That final expression includes terms for <span class="math inline">\(y_{t+1}\)</span>, <span class="math inline">\(y_t\)</span> and <span class="math inline">\(y_{t-1}\)</span>, but nothing else. Therefore part (a) is shown.</p>
 </div>
