@@ -197,13 +197,26 @@ $(document).ready(function () {
   \newcommand{\EE}[1]{\mathbb{E}\mathopen{}\left[ #1 \right]\mathclose{}}
   \newcommand{\Var}[1]{\mathrm{Var}\mathopen{}\left[ #1 \right]\mathclose{}}
   \newcommand{\dd}[0]{~\mathrm{d}}
+  \newcommand{\yy}[0]{\boldsymbol{y}}
   \]</span></p>
 </div>
+<p><em>This answer is just for part (a) of question 15. Also, it’s very much a work-in-progress as we try to make it clear and correct</em></p>
 <p>Question 15: Joint distributions: The autoregressive time-series model <span class="math inline">\(y_1\)</span>, <span class="math inline">\(y_2\)</span>, <span class="math inline">\(\dots\)</span> with mean level <span class="math inline">\(0\)</span>, autocorrelation <span class="math inline">\(0.8\)</span>, residual standard deviation <span class="math inline">\(1\)</span>, and normal errors can be written as <span class="math display">\[(y_t |y_{t−1} , y_{t−2} , \dots) \sim N(0.8y_{t−1} , 1) \qquad \mbox{ for all $t$}\]</span>.</p>
 <ol style="list-style-type: lower-alpha">
 <li><p>Prove that the distribution of <span class="math inline">\(y_t\)</span> , given the observations at all other integer time points <span class="math inline">\(t\)</span>, depends only on <span class="math inline">\(y_{t−1}\)</span> and <span class="math inline">\(y_{t+1}\)</span> .</p></li>
 <li><p>What is the distribution of <span class="math inline">\(y_t\)</span> given <span class="math inline">\(y_{t-1}\)</span> and <span class="math inline">\(y_{t+1}\)</span> ?</p></li>
 </ol>
+<div id="some-notation" class="section level3">
+<h3>some notation</h3>
+<p>First define some notation to make things more concise. Define <span class="math inline">\(\yy_{a..b}\)</span> as a vector of all <span class="math inline">\(y_i\)</span> with <span class="math inline">\(a \ge i \gt b\)</span>. This allows us to say:</p>
+<p><span class="math display">\[ \PP{\yy_{1..t}} = \PP{y_t, y_{t-1}, \dots, y_2, y_1} \]</span></p>
+</div>
+<div id="parta" class="section level3">
+<h3>part(a)</h3>
+<p>The question discusses “all other integer time points”. We define <span class="math inline">\(n\)</span> as an arbitrarily large integer much greater than <span class="math inline">\(t+1\)</span>. We can’t easily reason about “all” time points, as there are infinitely many; but we can consider large <span class="math inline">\(n\)</span> as <span class="math inline">\(n \rightarrow \infty\)</span>.</p>
+<p>We begin with the joint density over “all” time points: <span class="math display">\[
+    \PP{\yy_{1..n}} = \PP{y_n, y_{n−1} , y_{n−2}, \dots, y_{t+1}, y_t, y_{t-1} , \dots, y_1}
+\]</span></p>
 <p>Controversial (?) first step: The right hand side of the equation above has no <span class="math inline">\(y_*\)</span> other than <span class="math inline">\(y_{t-1}\)</span>, hence we can simplify it to: <span class="math display">\[(y_t |y_{t−1} , y_{t−2} , \dots) = (y_t |y_{t−1}) \sim N(0.8y_{t−1} , 1) \qquad \mbox{ for all $t$}\]</span>.</p>
 <p><span class="math display">\[
 \begin{align}
@@ -234,7 +247,11 @@ $(document).ready(function () {
 \end{align}
 \]</span></p>
 <p>That final expression includes terms for <span class="math inline">\(y_{t+1}\)</span>, <span class="math inline">\(y_t\)</span> and <span class="math inline">\(y_{t-1}\)</span>, but nothing else. Therefore part (a) is shown.</p>
+</div>
+<div id="part-b" class="section level3">
+<h3>part (b)</h3>
 <p>For part b, I think we can model <span class="math inline">\((y_{t+1}, y_t)\)</span> as a bivariate normal, parameterized in terms of <span class="math inline">\(y_{t-1}\)</span>, and use equation 3.14). TODO: part b!</p>
+</div>
 
 
 

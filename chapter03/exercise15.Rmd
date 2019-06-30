@@ -11,6 +11,7 @@ output: html_document
   \newcommand{\EE}[1]{\mathbb{E}\mathopen{}\left[ #1 \right]\mathclose{}}
   \newcommand{\Var}[1]{\mathrm{Var}\mathopen{}\left[ #1 \right]\mathclose{}}
   \newcommand{\dd}[0]{~\mathrm{d}}
+  \newcommand{\yy}[0]{\boldsymbol{y}}
   $$
 </div>
 
@@ -33,6 +34,8 @@ library(here)
 theme_set(theme_bw())
 ```
 
+_This answer is just for part (a) of question 15. Also, it's very much a work-in-progress as we try to make it clear and correct_
+
 Question 15: Joint distributions: The autoregressive time-series model $y_1$, $y_2$, $\dots$ with mean level $0$,
 autocorrelation $0.8$, residual standard deviation $1$, and normal errors can be written as
 $$(y_t |y_{t−1} , y_{t−2} , \dots) \sim N(0.8y_{t−1} , 1) \qquad \mbox{ for all $t$}$$.
@@ -41,6 +44,26 @@ $$(y_t |y_{t−1} , y_{t−2} , \dots) \sim N(0.8y_{t−1} , 1) \qquad \mbox{ fo
 $t$, depends only on $y_{t−1}$ and $y_{t+1}$ .
 
 (b) What is the distribution of $y_t$ given $y_{t-1}$ and $y_{t+1}$ ?
+
+### some notation
+
+First define some notation to make things more concise.
+Define $\yy_{a..b}$ as a vector of all $y_i$ with $a \ge i \gt b$.
+This allows us to say:
+
+$$ \PP{\yy_{1..t}} = \PP{y_t, y_{t-1}, \dots, y_2, y_1} $$
+
+### part(a)
+
+The question discusses "all other integer time points".
+We define $n$ as an arbitrarily large integer much greater than $t+1$.
+We can't easily reason about "all" time points, as there are infinitely many;
+but we can consider large $n$ as $n \rightarrow \infty$.
+
+We begin with the joint density over "all" time points:
+$$
+	\PP{\yy_{1..n}} = \PP{y_n, y_{n−1} , y_{n−2}, \dots, y_{t+1}, y_t, y_{t-1} , \dots, y_1}
+$$
 
 Controversial (?) first step: The right hand side of the equation above has no $y_*$ other than $y_{t-1}$,
 hence we can simplify it to:
@@ -77,6 +100,8 @@ $$
 
 That final expression includes terms for $y_{t+1}$, $y_t$ and $y_{t-1}$, but nothing else.
 Therefore part (a) is shown.
+
+### part (b)
 
 For part b, I think we can model $(y_{t+1}, y_t)$ as a bivariate normal,
 parameterized in terms of $y_{t-1}$, and use  equation 3.14).
