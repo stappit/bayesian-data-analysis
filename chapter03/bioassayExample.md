@@ -54,14 +54,21 @@ d %>%
 
 It is reasonable to model the outcomes of the five animals *within each
 group* as exchangeable and independent. The data points
-\(y_i\)=`n.deaths` are then binomially distributed:
-\[y_i | \theta_i \sim \text{Bin}(n_i, \theta)\] where \(n_i\) is the
+![y\_i](https://latex.codecogs.com/png.latex?y_i "y_i")=`n.deaths` are
+then binomially distributed:   
+![y\_i | \\theta\_i \\sim \\text{Bin}(n\_i,
+\\theta)](https://latex.codecogs.com/png.latex?y_i%20%7C%20%5Ctheta_i%20%5Csim%20%5Ctext%7BBin%7D%28n_i%2C%20%5Ctheta%29
+"y_i | \\theta_i \\sim \\text{Bin}(n_i, \\theta)")  
+where ![n\_i](https://latex.codecogs.com/png.latex?n_i "n_i") is the
 number of animals (in this example it is 5 for each group).
 
-We model the response \(\theta\) by the dose using a linear model
-together with a logit-link:
-\[\text{logit}(\theta_i)  = \alpha + \beta x_i\] This is called a
-logistic regression model.
+We model the response
+![\\theta](https://latex.codecogs.com/png.latex?%5Ctheta "\\theta") by
+the dose using a linear model together with a logit-link:   
+![\\text{logit}(\\theta\_i) = \\alpha + \\beta
+x\_i](https://latex.codecogs.com/png.latex?%5Ctext%7Blogit%7D%28%5Ctheta_i%29%20%20%3D%20%5Calpha%20%2B%20%5Cbeta%20x_i
+"\\text{logit}(\\theta_i)  = \\alpha + \\beta x_i")  
+This is called a logistic regression model.
 
 ## A frequentist approach
 
@@ -104,8 +111,12 @@ AIC: 15.789
 Number of Fisher Scoring iterations: 7
 ```
 
-The estimate is \((\hat{\alpha}, \hat{\beta}) = (0.85, 7.75)\) with
-standard errors of 1.0 and 4.9 for \(\alpha\) and \(\beta\),
+The estimate is ![(\\hat{\\alpha}, \\hat{\\beta}) =
+(0.85, 7.75)](https://latex.codecogs.com/png.latex?%28%5Chat%7B%5Calpha%7D%2C%20%5Chat%7B%5Cbeta%7D%29%20%3D%20%280.85%2C%207.75%29
+"(\\hat{\\alpha}, \\hat{\\beta}) = (0.85, 7.75)") with standard errors
+of 1.0 and 4.9 for
+![\\alpha](https://latex.codecogs.com/png.latex?%5Calpha "\\alpha") and
+![\\beta](https://latex.codecogs.com/png.latex?%5Cbeta "\\beta"),
 respectively.
 
 # Approximating the posterior using a grid
@@ -198,8 +209,10 @@ unf_post_plot
 
 To sample from the posterior, we take the following steps:
 
-1.  Compute the marginal posterior distribution of \(\alpha\) by
-    numerically summing over \(\beta\):
+1.  Compute the marginal posterior distribution of
+    ![\\alpha](https://latex.codecogs.com/png.latex?%5Calpha "\\alpha")
+    by numerically summing over
+    ![\\beta](https://latex.codecogs.com/png.latex?%5Cbeta "\\beta"):
 
 <!-- end list -->
 
@@ -210,11 +223,15 @@ marg.alpha <- post.grid %>%
   pull(post)
 ```
 
-2.  For \(s = 1, ..., 1000\) (or more if you want to have more samples),
+2.  For ![s = 1,
+    ..., 1000](https://latex.codecogs.com/png.latex?s%20%3D%201%2C%20...%2C%201000
+    "s = 1, ..., 1000") (or more if you want to have more samples),
 
 <!-- end list -->
 
-1)  Draw samples from \(p(\alpha | y)\):
+1)  Draw samples from ![p(\\alpha |
+    y)](https://latex.codecogs.com/png.latex?p%28%5Calpha%20%7C%20y%29
+    "p(\\alpha | y)"):
 
 <!-- end list -->
 
@@ -223,8 +240,12 @@ N <- 1000
 alpha.sample <- sample(seq(-5, 10, length.out = 100), N, replace=T, prob=marg.alpha)
 ```
 
-2)  Draw \(\beta\) from the discrete conditional distribution
-    \(p(\beta | \alpha, y)\) given the just-sampled value of \(\alpha\):
+2)  Draw ![\\beta](https://latex.codecogs.com/png.latex?%5Cbeta
+    "\\beta") from the discrete conditional distribution ![p(\\beta |
+    \\alpha,
+    y)](https://latex.codecogs.com/png.latex?p%28%5Cbeta%20%7C%20%5Calpha%2C%20y%29
+    "p(\\beta | \\alpha, y)") given the just-sampled value of
+    ![\\alpha](https://latex.codecogs.com/png.latex?%5Calpha "\\alpha"):
 
 <!-- end list -->
 
@@ -240,10 +261,12 @@ for(i in 1:N) {
 }
 ```
 
-3)  For each of the sampled \(\alpha\) and \(\beta\), add a uniform
-    random jitter, centered at zero with a width equal to the spacing of
-    the sampling grid, This gives the simulation draws a continuous
-    distribution:
+3)  For each of the sampled
+    ![\\alpha](https://latex.codecogs.com/png.latex?%5Calpha "\\alpha")
+    and ![\\beta](https://latex.codecogs.com/png.latex?%5Cbeta
+    "\\beta"), add a uniform random jitter, centered at zero with a
+    width equal to the spacing of the sampling grid, This gives the
+    simulation draws a continuous distribution:
 
 <!-- end list -->
 
@@ -366,19 +389,31 @@ plot_samples(prior.sample, n=200, title="Prior samples")
 
 We can use the posterior sample to compute the LD50 - the dose level at
 which probability of death is 50%. In our logistic model, a 50% survival
-rate means \[\begin{align*}
-\text{LD50}: && E(\frac{y_i}{n_i}) = \text{logit}^{-1}(\alpha + \beta x_i) = 0.5
-\end{align*}\] Thus \(\alpha + \beta x_i = \text{logit}(0.5) = 0\) and
-the LD50 is \(x_i = -\alpha / \beta\).
+rate means   
+![\\begin{align\*}
+\\text{LD50}: && E(\\frac{y\_i}{n\_i}) = \\text{logit}^{-1}(\\alpha +
+\\beta x\_i) = 0.5
+\\end{align\*}](https://latex.codecogs.com/png.latex?%5Cbegin%7Balign%2A%7D%0A%5Ctext%7BLD50%7D%3A%20%26%26%20E%28%5Cfrac%7By_i%7D%7Bn_i%7D%29%20%3D%20%5Ctext%7Blogit%7D%5E%7B-1%7D%28%5Calpha%20%2B%20%5Cbeta%20x_i%29%20%3D%200.5%0A%5Cend%7Balign%2A%7D
+"\\begin{align*}
+\\text{LD50}: && E(\\frac{y_i}{n_i}) = \\text{logit}^{-1}(\\alpha + \\beta x_i) = 0.5
+\\end{align*}")  
+Thus ![\\alpha + \\beta x\_i = \\text{logit}(0.5)
+= 0](https://latex.codecogs.com/png.latex?%5Calpha%20%2B%20%5Cbeta%20x_i%20%3D%20%5Ctext%7Blogit%7D%280.5%29%20%3D%200
+"\\alpha + \\beta x_i = \\text{logit}(0.5) = 0") and the LD50 is ![x\_i
+= -\\alpha /
+\\beta](https://latex.codecogs.com/png.latex?x_i%20%3D%20-%5Calpha%20%2F%20%5Cbeta
+"x_i = -\\alpha / \\beta").
 
-*Attention:* In this example, LD50 is a meaningless concept if
-\(\beta \leq 0\), in which case increasing the dose does not cause the
+*Attention:* In this example, LD50 is a meaningless concept if ![\\beta
+\\leq 0](https://latex.codecogs.com/png.latex?%5Cbeta%20%5Cleq%200
+"\\beta \\leq 0"), in which case increasing the dose does not cause the
 probability of death to increase.
 
 We report:
 
-1)  The posterior probability that \(\beta > 0\), that is, that the drug
-    is harmful:
+1)  The posterior probability that ![\\beta
+    \> 0](https://latex.codecogs.com/png.latex?%5Cbeta%20%3E%200
+    "\\beta \> 0"), that is, that the drug is harmful:
 
 <!-- end list -->
 
@@ -388,12 +423,15 @@ mean(post.sample$beta > 0)
 
     [1] 1
 
-From this, we can conclude that the posterior probability of
-\(\beta > 0\) is roughly estimated to exceed 0.999.
+From this, we can conclude that the posterior probability of ![\\beta
+\> 0](https://latex.codecogs.com/png.latex?%5Cbeta%20%3E%200
+"\\beta \> 0") is roughly estimated to exceed 0.999.
 
-2)  The posterior distribution for the LD50 conditional on
-    \(\beta > 0\). All draws had positive values of \(\beta\), so the
-    distribution is given by the whole sample:
+2)  The posterior distribution for the LD50 conditional on ![\\beta
+    \> 0](https://latex.codecogs.com/png.latex?%5Cbeta%20%3E%200
+    "\\beta \> 0"). All draws had positive values of
+    ![\\beta](https://latex.codecogs.com/png.latex?%5Cbeta "\\beta"), so
+    the distribution is given by the whole sample:
 
 <!-- end list -->
 
@@ -431,10 +469,15 @@ plot_samples(post.sample) +
 # A different prior
 
 We want to replace the uniform prior density by a joint normal prior
-distribution on \((\alpha, \beta)\) with
-\(\alpha \sim \text{Normal}(0, 2^2)\),
-\(\beta \sim \text{Normal}(10, 10^2)\), and
-\(\text{corr}(\alpha, \beta)=0.5\).
+distribution on ![(\\alpha,
+\\beta)](https://latex.codecogs.com/png.latex?%28%5Calpha%2C%20%5Cbeta%29
+"(\\alpha, \\beta)") with ![\\alpha \\sim
+\\text{Normal}(0, 2^2)](https://latex.codecogs.com/png.latex?%5Calpha%20%5Csim%20%5Ctext%7BNormal%7D%280%2C%202%5E2%29
+"\\alpha \\sim \\text{Normal}(0, 2^2)"), ![\\beta \\sim
+\\text{Normal}(10, 10^2)](https://latex.codecogs.com/png.latex?%5Cbeta%20%5Csim%20%5Ctext%7BNormal%7D%2810%2C%2010%5E2%29
+"\\beta \\sim \\text{Normal}(10, 10^2)"), and ![\\text{corr}(\\alpha,
+\\beta)=0.5](https://latex.codecogs.com/png.latex?%5Ctext%7Bcorr%7D%28%5Calpha%2C%20%5Cbeta%29%3D0.5
+"\\text{corr}(\\alpha, \\beta)=0.5").
 
 ``` r
 mvn_prior <- function(alpha, beta) {
@@ -640,7 +683,13 @@ mode and a normal distribution. We will now compute the normal
 approximation and compare it to the exact posterior obtained by the
 uniform prior.
 
+Since we assume a uniform prior density for ![(\\alpha,
+\\beta)](https://latex.codecogs.com/png.latex?%28%5Calpha%2C%20%5Cbeta%29
+"(\\alpha, \\beta)"), the posterior mode is the same as the maximum
+likelihood estimate. So we get the mode by computing the MLE:
+
 ``` r
+# lkhd function
 bioassayfun <- function(w, df) {
   z <- w[1] + w[2]*df$log.dose
   -sum(df$n.deaths*(z) - df$n.animals*log1p(exp(z)))
@@ -649,12 +698,14 @@ bioassayfun <- function(w, df) {
 #' Optimize
 w0 <- c(0,0)
 optim_res <- optim(w0, bioassayfun, gr = NULL, d, hessian = T)
+# w is the mode
 w <- optim_res$par
+# this computes the inverse of the hessian at the mode
 S <- solve(optim_res$hessian)
 
 #' Multivariate normal probability density function
 dmvnorm <- function(x, mu, sig)
-  exp(-0.5*(length(x)*log(2*pi) + log(det(sig)) + (x-mu)%*%solve(sig, x-mu)))
+  exp(-0.5*(length(x)*log(2*pi) + log(det(sig)) + (x-mu) %*% solve(sig, x - mu)))
 
 #' Evaluate likelihood at points (alpha, beta) 
 ab_grid <- expand.grid(alpha = alpha_seq, 
@@ -704,16 +755,19 @@ norm_post_sample <- norm_sample %>%
 norm_post_sample
 ```
 
+    Warning: Removed 1 rows containing missing values (geom_point).
+
 ![](bioassayExample_files/figure-gfm/unnamed-chunk-35-1.png)<!-- -->
 
-This also affects the resulting LD50 and the probability that
-\(\beta > 0\):
+This also affects the resulting LD50 and the probability that ![\\beta
+\> 0](https://latex.codecogs.com/png.latex?%5Cbeta%20%3E%200
+"\\beta \> 0"):
 
 ``` r
 mean(norm_sample$beta > 0)
 ```
 
-    [1] 0.954
+    [1] 0.938
 
 Before, this probability was ~1.
 

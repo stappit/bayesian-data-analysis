@@ -2,7 +2,9 @@
 title: "Bioassay Experiment"
 author: "Corrie"
 date: "5/29/2019"
-output: github_document
+output: 
+  github_document:
+    pandoc_args: --webtex
 ---
 
 ```{r setup, include=FALSE}
@@ -475,7 +477,9 @@ plot_grid(mvn.LD50.plot, unif.LD50.plot)
 The fourth chapter _Asymptotics and Non-Bayesian Approaches_ explains how it is possible to approximate the posterior distribution, using the mode and a normal distribution.
 We will now compute the normal approximation and compare it to the exact posterior obtained by the uniform prior.
 
+Since we assume a uniform prior density for $(\alpha, \beta)$, the posterior mode is the same as the maximum likelihood estimate. So we get the mode by computing the MLE:
 ```{r,  fig.height=5, fig.width=5}
+# lkhd function
 bioassayfun <- function(w, df) {
   z <- w[1] + w[2]*df$log.dose
   -sum(df$n.deaths*(z) - df$n.animals*log1p(exp(z)))
@@ -484,12 +488,14 @@ bioassayfun <- function(w, df) {
 #' Optimize
 w0 <- c(0,0)
 optim_res <- optim(w0, bioassayfun, gr = NULL, d, hessian = T)
+# w is the mode
 w <- optim_res$par
+# this computes the inverse of the hessian at the mode
 S <- solve(optim_res$hessian)
 
 #' Multivariate normal probability density function
 dmvnorm <- function(x, mu, sig)
-  exp(-0.5*(length(x)*log(2*pi) + log(det(sig)) + (x-mu)%*%solve(sig, x-mu)))
+  exp(-0.5*(length(x)*log(2*pi) + log(det(sig)) + (x-mu) %*% solve(sig, x - mu)))
 
 #' Evaluate likelihood at points (alpha, beta) 
 ab_grid <- expand.grid(alpha = alpha_seq, 
