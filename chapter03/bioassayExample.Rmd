@@ -2,7 +2,9 @@
 title: "Bioassay Experiment"
 author: "Corrie"
 date: "5/29/2019"
-output: html_document
+output: 
+  github_document:
+    pandoc_args: --webtex
 ---
 
 ```{r setup, include=FALSE}
@@ -10,6 +12,7 @@ knitr::opts_chunk$set(echo = TRUE, comment = NA)
 ```
 
 ```{r, warning=F, message=F}
+library(MASS)
 library(ggplot2)
 library(mvtnorm)
 library(dplyr)
@@ -132,7 +135,7 @@ unf_post_plot <- post.grid %>%
 unf_post_plot
 ```
 
-# Sampling from the posterior
+## Sampling from the posterior
 To sample from the posterior, we take the following steps:
 
 1. Compute the marginal posterior distribution of $\alpha$ by numerically summing over $\beta$:
@@ -213,14 +216,16 @@ We can now plot the posterior sample:
 ```{r, fig.height=5, fig.width=5}
 post.sample <- extract.sample(post.grid)
 
-post.sample %>%
+unf_post_sample <- post.sample %>%
   ggplot(aes(x=alpha, y=beta)) +
   geom_point(size=0.5) +
   ylim(-10, 40) +
   scale_x_continuous(breaks=c(-4, -2, 0, 2, 4, 6, 8, 10), 
                      limits = c(-5, 10)) +
   theme_minimal() +
-  labs(title="Posterior sample")
+  labs(title="Posterior sample",
+       subtitle="with uniform prior")
+unf_post_sample 
 ```
 
 
@@ -408,7 +413,7 @@ mvn.post.grid[which.max(mvn.post.grid$post),]
 
 While the beta value is the same (at least in our grid approximation), the new posterior alpha is a bit closer to zero. 
 
-# Sampling from the new posterior
+## Sampling from the new posterior
 ```{r, fig.height=5, fig.width=10, warning=F}
 mvn.post.sample <- extract.sample(mvn.post.grid)
 mvn.prior.sample <- extract.sample(mvn.prior.grid, prior = T)
@@ -466,3 +471,110 @@ mvn.LD50.plot <- mvn.LD50_samps %>%
 
 plot_grid(mvn.LD50.plot, unif.LD50.plot)
 ```
+
+
+# Normal approximation of the posterior
+The fourth chapter _Asymptotics and Non-Bayesian Approaches_ explains how it is possible to approximate the posterior distribution, using the mode and a normal distribution.
+We will now compute the normal approximation and compare it to the exact posterior obtained by the uniform prior.
+
+Since we assume a uniform prior density for $(\alpha, \beta)$, the posterior mode is the same as the maximum likelihood estimate. So we get the mode by computing the MLE:
+```{r,  fig.height=5, fig.width=5}
+# lkhd function
+bioassayfun <- function(w, df) {
+  z <- w[1] + w[2]*df$log.dose
+  -sum(df$n.deaths*(z) - df$n.animals*log1p(exp(z)))
+}
+
+#' Optimize
+w0 <- c(0,0)
+optim_res <- optim(w0, bioassayfun, gr = NULL, d, hessian = T)
+# w is the mode
+w <- optim_res$par
+# this computes the inverse of the hessian at the mode
+S <- solve(optim_res$hessian)
+
+#' Multivariate normal probability density function
+dmvnorm <- function(x, mu, sig)
+  exp(-0.5*(length(x)*log(2*pi) + log(det(sig)) + (x-mu) %*% solve(sig, x - mu)))
+
+#' Evaluate likelihood at points (alpha, beta) 
+ab_grid <- expand.grid(alpha = alpha_seq, 
+                         beta = beta_seq ) 
+
+ab_grid$lkhd <- apply(ab_grid, 1, dmvnorm, w, S)
+
+
+
+
+#' Create a plot of the posterior density
+norm_post_plot <- ggplot(data = ab_grid, aes(x = alpha, y = beta, z=lkhd)) +
+  stat_contour( col="#377EB8") +
+  ylim(-10, 40) +
+  scale_x_continuous(breaks=c(-4, -2, 0, 2, 4, 6, 8, 10), 
+                     limits = c(-5, 10)) +
+  theme_minimal() +
+  labs(x = 'alpha', y = 'beta',
+       title="Posterior Density",
+       subtitle="using normal Approximation" ) 
+
+norm_post_plot
+```
+
+The posterior density is very similar to the one we obtained before, but it is missing the slight skew in the upper corner.
+
+Similarly for the posterior sample:
+```{r, fig.height=5, fig.width=5}
+# sample from the multivariate model
+norm_sample <- MASS::mvrnorm(N, w, S) %>%
+  data.frame() %>%
+  rename(alpha=X1, beta=X2)
+
+norm_post_sample <- norm_sample %>%
+  ggplot() +
+  geom_point(aes(alpha, beta), size=0.5) +
+  ylim(-10, 40) +
+  scale_x_continuous(breaks=c(-4, -2, 0, 2, 4, 6, 8, 10), 
+                     limits = c(-5, 10)) +
+  theme_minimal() +
+  labs(title="Posterior sample",
+       subtitle="using normal approximation")
+norm_post_sample
+```
+
+This also affects the resulting LD50 and the probability that $\beta > 0$:
+```{r}
+mean(norm_sample$beta > 0)
+```
+Before, this probability was ~1.
+
+```{r, warning=F, message=F}
+LD50_norm_samps <- norm_sample %>%
+  filter( beta > 0 ) %>%
+  mutate( LD50 = - alpha/beta )
+
+LD50_norm_mean <- LD50_norm_samps %>%
+  summarise(mean = mean(LD50))
+
+norm.LD50.plot <- LD50_norm_samps %>%
+  ggplot(aes(x=LD50)) + 
+  geom_histogram(bins=50, 
+                 fill="#377EB8", col="white") +
+  scale_y_continuous(labels = NULL, name="") +
+  xlim(-1, 1) +
+  geom_vline(data=LD50_norm_mean, aes(xintercept=mean), col="#E41A1C") +
+  theme_minimal() +
+  labs(title="Posterior distribution for the LD50",
+       subtitle="using normal approximation")
+
+norm.LD50.plot
+```
+
+## Comparison
+A direct comparison of the normal approximation with the exact posterior makes the differences clearer:
+```{r, fig.height=10, fig.width=12, warning=F, message=F}
+#' Combine the plots
+plot_grid(unf_post_plot, unf_post_sample, 
+             unif.LD50.plot + xlim(-1, 1), norm_post_plot, 
+             norm_post_sample, norm.LD50.plot, ncol = 3)
+```
+
